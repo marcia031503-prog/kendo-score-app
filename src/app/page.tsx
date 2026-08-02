@@ -8,10 +8,10 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
-  // ご指定の新チームメンバー6名
+  // 赤チームの選手候補（ドロップダウン用）
   const redCandidates = ['山本', '松田', '山内', '橋本', '安野', '重村'];
-  const whiteCandidates = ['因分', '小倉', '岡本', '河田', '重村', '選手H'];
 
+  // 各ポジションごとの選手名・技の状態
   const [matches, setMatches] = useState([
     { position: '先鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', whitePoint1: '-', whitePoint2: '-', winner: '-' },
     { position: '次鋒', redPlayer: '松田', whitePlayer: '小倉', redPoint1: '-', redPoint2: '-', whitePoint1: '-', whitePoint2: '-', winner: '-' },
@@ -23,9 +23,35 @@ export default function KendoTeamScoreApp() {
   const techOptions = ['-', '面', '小手', '胴', '突', '出ばな面', '相面', '返し面', '引き面', '抜き面', '出ばな小手', '相小手', '返し胴', '抜き胴', '反則'];
   const winnerOptions = ['-', '赤勝ち', '白勝ち', '引き分け'];
 
+  // 技の選択に応じて自動で勝敗を判定する関数
   const updateMatch = (index: number, field: string, value: string) => {
     const newMatches = [...matches];
-    newMatches[index] = { ...newMatches[index], [field]: value };
+    const target = { ...newMatches[index], [field]: value };
+
+    const redCount = (target.redPoint1 !== '-' ? 1 : 0) + (target.redPoint2 !== '-' ? 1 : 0);
+    const whiteCount = (target.whitePoint1 !== '-' ? 1 : 0) + (target.whitePoint2 !== '-' ? 1 : 0);
+
+    if (redCount > whiteCount) {
+      target.winner = '赤勝ち';
+    } else if (whiteCount > redCount) {
+      target.winner = '白勝ち';
+    } else if (redCount === 2 && whiteCount === 2) {
+      target.winner = '引き分け';
+    } else if (redCount === 0 && whiteCount === 0) {
+      target.winner = '-';
+    } else {
+      if (target.redPoint1 !== '-' && target.whitePoint1 !== '-') {
+        target.winner = '引き分け';
+      }
+    }
+
+    newMatches[index] = target;
+    setMatches(newMatches);
+  };
+
+  const handleWinnerChange = (index: number, value: string) => {
+    const newMatches = [...matches];
+    newMatches[index] = { ...newMatches[index], winner: value };
     setMatches(newMatches);
   };
 
@@ -99,27 +125,33 @@ export default function KendoTeamScoreApp() {
               {['先鋒', '次鋒', '中堅', '副将', '大将'].map(pos => (
                 <th key={pos} style={{ border: '1px solid #333', padding: '6px' }}>{pos}</th>
               ))}
-              <th style={{ border: '1px solid #333', padding: '6px', width: '70px' }}>結果</th>
+              <th style={{ border: '1px solid #333', padding: '6px', width: '90px' }}>結果</th>
             </tr>
           </thead>
           <tbody>
+            {/* 赤チーム選手行 */}
             <tr>
               <td style={{ border: '1px solid #333', padding: '6px', textAlign: 'center', background: '#fdf2f2', color: '#d9534f', fontWeight: 'bold' }}>
                 赤: {teamRed}
               </td>
               {matches.map((m, idx) => (
                 <td key={idx} style={{ border: '1px solid #333', padding: '4px', textAlign: 'center', background: '#fff5f5' }}>
-                  <select value={m.redPlayer} onChange={e => updateMatch(idx, 'redPlayer', e.target.value)} style={{ width: '100%', padding: '4px', fontWeight: 'bold', color: '#d9534f' }}>
+                  <select value={m.redPlayer} onChange={e => {
+                    const newMatches = [...matches];
+                    newMatches[idx].redPlayer = e.target.value;
+                    setMatches(newMatches);
+                  }} style={{ width: '100%', padding: '4px', fontWeight: 'bold', color: '#d9534f' }}>
                     {redCandidates.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </td>
               ))}
-              <td rowSpan={3} style={{ border: '1px solid #333', padding: '4px', textAlign: 'center', background: '#f8f9fa', verticalAlign: 'middle' }}>
-                <div style={{ fontSize: '11px', color: '#666' }}>赤 {totals.redWins}勝</div>
-                <div style={{ fontSize: '11px', color: '#666' }}>白 {totals.whiteWins}勝</div>
+              <td rowSpan={3} style={{ border: '1px solid #333', padding: '6px', textAlign: 'center', background: '#f8f9fa', verticalAlign: 'middle' }}>
+                <div style={{ fontSize: '12px', color: '#d9534f', fontWeight: 'bold', marginBottom: '4px' }}>赤 {totals.redWins}勝</div>
+                <div style={{ fontSize: '12px', color: '#0275d8', fontWeight: 'bold' }}>白 {totals.whiteWins}勝</div>
               </td>
             </tr>
 
+            {/* 技・判定行 */}
             <tr>
               <td style={{ border: '1px solid #333', padding: '6px', textAlign: 'center', background: '#f1f3f5', fontSize: '11px' }}>
                 技・判定
@@ -145,7 +177,7 @@ export default function KendoTeamScoreApp() {
                     </select>
                   </div>
                   <div style={{ marginTop: '4px' }}>
-                    <select value={m.winner} onChange={e => updateMatch(idx, 'winner', e.target.value)} style={{ width: '100%', fontSize: '11px', padding: '3px', fontWeight: 'bold' }}>
+                    <select value={m.winner} onChange={e => handleWinnerChange(idx, e.target.value)} style={{ width: '100%', fontSize: '11px', padding: '3px', fontWeight: 'bold', background: m.winner === '赤勝ち' ? '#ffe3e3' : m.winner === '白勝ち' ? '#e7f5ff' : '#fff' }}>
                       {winnerOptions.map(w => <option key={w} value={w}>{w}</option>)}
                     </select>
                   </div>
@@ -153,15 +185,24 @@ export default function KendoTeamScoreApp() {
               ))}
             </tr>
 
+            {/* 白チーム選手行（自由に入力できるテキストボックスに変更） */}
             <tr>
               <td style={{ border: '1px solid #333', padding: '6px', textAlign: 'center', background: '#f0f4f8', color: '#0275d8', fontWeight: 'bold' }}>
                 白: {teamWhite}
               </td>
               {matches.map((m, idx) => (
                 <td key={idx} style={{ border: '1px solid #333', padding: '4px', textAlign: 'center', background: '#f5f8fc' }}>
-                  <select value={m.whitePlayer} onChange={e => updateMatch(idx, 'whitePlayer', e.target.value)} style={{ width: '100%', padding: '4px', fontWeight: 'bold', color: '#0275d8' }}>
-                    {whiteCandidates.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
+                  <input
+                    type="text"
+                    value={m.whitePlayer}
+                    onChange={e => {
+                      const newMatches = [...matches];
+                      newMatches[idx].whitePlayer = e.target.value;
+                      setMatches(newMatches);
+                    }}
+                    placeholder="選手名"
+                    style={{ width: '100%', padding: '4px', fontWeight: 'bold', color: '#0275d8', textAlign: 'center', boxSizing: 'border-box' }}
+                  />
                 </td>
               ))}
             </tr>
