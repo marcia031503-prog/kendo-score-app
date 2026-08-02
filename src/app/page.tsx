@@ -8,8 +8,7 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
-  // 試合時間タイマー機能
-  const [timeLeft, setTimeLeft] = useState(240); // 4分 = 240秒
+  const [timeLeft, setTimeLeft] = useState(240);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
@@ -30,7 +29,6 @@ export default function KendoTeamScoreApp() {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // 3本目（1本目、2本目、3本目）および詳細技3つまで対応したデータ
   const [matchRows, setMatchRows] = useState([
     { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
     { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
