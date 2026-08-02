@@ -8,7 +8,7 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
-  // 3本目まで記録できるように拡張したデータ
+  // 3本目（1本目、2本目、3本目）および詳細技3つまで記録できるデータ構造
   const [matchRows, setMatchRows] = useState([
     { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
     { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
