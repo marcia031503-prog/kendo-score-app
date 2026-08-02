@@ -8,16 +8,16 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
-  // 新チームのメンバー候補（必要に応じてここを変更してください）
+  // 新チームの選手候補リスト（ここを書き換えると選べる選手が変わります）
   const redPlayerCandidates = ['高川', '山本', '嶋内', '安野', '吉田', '選手F', '選手G'];
   const whitePlayerCandidates = ['川中', '因分', '小倉', '岡本', '河田', '選手H', '選手I'];
 
   const [matchRows, setMatchRows] = useState([
-    { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
-    { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
-    { position: '中堅', redPlayer: '嶋内', whitePlayer: '小倉', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
-    { position: '副将', redPlayer: '安野', whitePlayer: '岡本', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
-    { position: '大将', redPlayer: '吉田', whitePlayer: '河田', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
+    { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '(詳細なし)', detail2: '(詳細なし)', detail3: '(詳細なし)' },
+    { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '(詳細なし)', detail2: '(詳細なし)', detail3: '(詳細なし)' },
+    { position: '中堅', redPlayer: '嶋内', whitePlayer: '小倉', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '(詳細なし)', detail2: '(詳細なし)', detail3: '(詳細なし)' },
+    { position: '副将', redPlayer: '安野', whitePlayer: '岡本', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '(詳細なし)', detail2: '(詳細なし)', detail3: '(詳細なし)' },
+    { position: '大将', redPlayer: '吉田', whitePlayer: '河田', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '(詳細なし)', detail2: '(詳細なし)', detail3: '(詳細なし)' },
   ]);
 
   const pointOptions = ['-', '赤:メ', '赤:ド', '赤:コ', '赤:ツ', '赤:▲', '白:メ', '白:ド', '白:コ', '白:ツ', '白:▲'];
@@ -57,9 +57,9 @@ export default function KendoTeamScoreApp() {
         redPoint2: '-',
         redPoint3: '-',
         winner: '-',
-        detail1: '',
-        detail2: '',
-        detail3: ''
+        detail1: '(詳細なし)',
+        detail2: '(詳細なし)',
+        detail3: '(詳細なし)'
       })));
     }
   };
@@ -120,7 +120,7 @@ export default function KendoTeamScoreApp() {
               <tr key={row.position}>
                 <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontWeight: 'bold', background: '#f8f9fa' }}>{row.position}</td>
                 <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
-                  <select value={row.redPlayer} onChange={e => updateRow(index, 'redPlayer', e.target.value)} style={{ padding: '4px' }}>
+                  <select value={row.redPlayer} onChange={e => updateRow(index, 'redPlayer', e.target.value)} style={{ padding: '4px', color: '#d9534f', fontWeight: 'bold' }}>
                     {redPlayerCandidates.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </td>
@@ -160,7 +160,7 @@ export default function KendoTeamScoreApp() {
                   </select>
                 </td>
                 <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
-                  <select value={row.whitePlayer} onChange={e => updateRow(index, 'whitePlayer', e.target.value)} style={{ padding: '4px' }}>
+                  <select value={row.whitePlayer} onChange={e => updateRow(index, 'whitePlayer', e.target.value)} style={{ padding: '4px', color: '#0275d8', fontWeight: 'bold' }}>
                     {whitePlayerCandidates.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </td>
