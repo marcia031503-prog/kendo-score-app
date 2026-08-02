@@ -8,6 +8,10 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
+  // 新チームのメンバー候補（必要に応じてここを変更してください）
+  const redPlayerCandidates = ['高川', '山本', '嶋内', '安野', '吉田', '選手F', '選手G'];
+  const whitePlayerCandidates = ['川中', '因分', '小倉', '岡本', '河田', '選手H', '選手I'];
+
   const [matchRows, setMatchRows] = useState([
     { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
     { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
@@ -76,7 +80,7 @@ export default function KendoTeamScoreApp() {
 
   return (
     <div style={{ padding: '15px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto', background: '#fff', minHeight: '100vh' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '20px' }}>⚔️ 剣道団体戦 スコア記録シート（三本勝負対応）</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '20px' }}>⚔️ 剣道団体戦 スコア記録シート（選手選択プルダウン対応）</h2>
 
       <div style={{ background: '#f8f9fa', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '14px' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
@@ -115,8 +119,10 @@ export default function KendoTeamScoreApp() {
             {matchRows.map((row, index) => (
               <tr key={row.position}>
                 <td style={{ border: '1px solid #ddd', padding: '8px', textAlign: 'center', fontWeight: 'bold', background: '#f8f9fa' }}>{row.position}</td>
-                <td style={{ border: '1px solid #ddd', padding: '6px' }}>
-                  <input type="text" value={row.redPlayer} onChange={e => updateRow(index, 'redPlayer', e.target.value)} style={{ width: '60px', padding: '4px' }} />
+                <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
+                  <select value={row.redPlayer} onChange={e => updateRow(index, 'redPlayer', e.target.value)} style={{ padding: '4px' }}>
+                    {redPlayerCandidates.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
                 </td>
                 <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
                   <select value={row.redPoint1} onChange={e => updateRow(index, 'redPoint1', e.target.value)} style={{ padding: '4px' }}>
@@ -153,8 +159,10 @@ export default function KendoTeamScoreApp() {
                     {detailOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </td>
-                <td style={{ border: '1px solid #ddd', padding: '6px' }}>
-                  <input type="text" value={row.whitePlayer} onChange={e => updateRow(index, 'whitePlayer', e.target.value)} style={{ width: '60px', padding: '4px' }} />
+                <td style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center' }}>
+                  <select value={row.whitePlayer} onChange={e => updateRow(index, 'whitePlayer', e.target.value)} style={{ padding: '4px' }}>
+                    {whitePlayerCandidates.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
                 </td>
               </tr>
             ))}
