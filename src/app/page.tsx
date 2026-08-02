@@ -22,7 +22,7 @@ export default function KendoTeamScoreApp() {
 
   const updateRow = (index, field, value) => {
     const newRows = [...matchRows];
-    newRows[index][field] = value;
+    newRows[index] = { ...newRows[index], [field]: value };
     setMatchRows(newRows);
   };
 
@@ -35,8 +35,8 @@ export default function KendoTeamScoreApp() {
       if (row.winner === '負') whiteWins++;
 
       [row.redPoint1, row.redPoint2, row.redPoint3].forEach(p => {
-        if (p.startsWith('赤:')) redIppon++;
-        if (p.startsWith('白:')) whiteIppon++;
+        if (p && p.startsWith('赤:')) redIppon++;
+        if (p && p.startsWith('白:')) whiteIppon++;
       });
     });
 
@@ -96,7 +96,7 @@ export default function KendoTeamScoreApp() {
       </div>
 
       <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', minWidth: '900px', fontSize: '13px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', minWidth: '950px', fontSize: '13px' }}>
           <thead>
             <tr style={{ background: '#f1f3f5' }}>
               <th style={{ border: '1px solid #ddd', padding: '8px' }}>ポジション</th>
