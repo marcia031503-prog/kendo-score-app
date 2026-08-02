@@ -8,7 +8,7 @@ export default function KendoTeamScoreApp() {
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
 
-  // 3本目（redPoint3, detail3）まで記録できるように拡張したデータ
+  // 3本目まで記録できるように拡張したデータ
   const [matchRows, setMatchRows] = useState([
     { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
     { position: '次鋒', redPlayer: '山本', whitePlayer: '因分', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
@@ -35,7 +35,6 @@ export default function KendoTeamScoreApp() {
       if (row.winner === '勝') redWins++;
       if (row.winner === '負') whiteWins++;
 
-      // 1本目〜3本目までの有効打突をすべて集計
       [row.redPoint1, row.redPoint2, row.redPoint3].forEach(p => {
         if (p.startsWith('赤:')) redIppon++;
         if (p.startsWith('白:')) whiteIppon++;
