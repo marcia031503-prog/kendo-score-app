@@ -1,33 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export default function KendoTeamScoreApp() {
   const [tournamentName, setTournamentName] = useState('山県中学校剣道選手権大会');
   const [matchDate, setMatchDate] = useState('2026 / 07 / 19');
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('川中');
-
-  const [timeLeft, setTimeLeft] = useState(240);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunning && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsTimerRunning(false);
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunning, timeLeft]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
 
   const [matchRows, setMatchRows] = useState([
     { position: '先鋒', redPlayer: '高川', whitePlayer: '川中', redPoint1: '-', redPoint2: '-', redPoint3: '-', winner: '-', detail1: '', detail2: '', detail3: '' },
@@ -98,26 +77,6 @@ export default function KendoTeamScoreApp() {
   return (
     <div style={{ padding: '15px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto', background: '#fff', minHeight: '100vh' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '20px' }}>⚔️ 剣道団体戦 スコア記録シート（三本勝負対応）</h2>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#e9ecef', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
-        <div>
-          <strong>試合時間タイマー: </strong>
-          <span style={{ fontSize: '22px', fontWeight: 'bold', marginLeft: '10px', color: timeLeft <= 30 ? 'red' : '#333' }}>
-            {formatTime(timeLeft)}
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => setIsTimerRunning(!isTimerRunning)} style={{ padding: '6px 12px', background: isTimerRunning ? '#dc3545' : '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-            {isTimerRunning ? 'ストップ' : 'スタート'}
-          </button>
-          <button onClick={() => { setIsTimerRunning(false); setTimeLeft(240); }} style={{ padding: '6px 10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            4分リセット
-          </button>
-          <button onClick={() => { setIsTimerRunning(false); setTimeLeft(180); }} style={{ padding: '6px 10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            3分リセット
-          </button>
-        </div>
-      </div>
 
       <div style={{ background: '#f8f9fa', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '14px' }}>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
