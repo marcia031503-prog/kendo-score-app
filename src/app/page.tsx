@@ -20,7 +20,7 @@ export default function KendoTeamScoreApp() {
   const detailOptions = ['(詳細なし)', '面', '出ばな面', '相面', '返し面', '引き面', '抜き面', '胴', '返し胴', '抜き胴', '小手', '出ばな小手', '相小手', '突', '反則'];
   const winnerOptions = ['-', '勝', '負', '引き分け'];
 
-  const updateRow = (index, field, value) => {
+  const updateRow = (index: number, field: string, value: string) => {
     const newRows = [...matchRows];
     newRows[index] = { ...newRows[index], [field]: value };
     setMatchRows(newRows);
