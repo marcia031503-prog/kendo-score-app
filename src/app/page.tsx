@@ -30,7 +30,8 @@ export default function KendoTeamScoreApp() {
     winner: '-'
   });
 
-  const techOptions = ['-', '面', '小手', '胴', '突', '出ばな面', '相面', '返し面', '引き面', '抜き面', '出ばな小手', '相小手', '返し胴', '抜き胴', '反則'];
+  // 不戦勝（二本勝ち＝丸ふたつ）の選択肢を追加
+  const techOptions = ['-', '面', '小手', '胴', '突', '出ばな面', '相面', '返し面', '引き面', '抜き面', '出ばな小手', '相小手', '返し胴', '抜き胴', '反則', '不戦勝(○2つ)'];
   const winnerOptions = ['-', '赤勝ち', '白勝ち', '引き分け'];
 
   // 通常試合の自動勝敗判定
@@ -38,20 +39,33 @@ export default function KendoTeamScoreApp() {
     const newMatches = [...matches];
     const target = { ...newMatches[index], [field]: value };
 
-    const redCount = (target.redPoint1 !== '-' ? 1 : 0) + (target.redPoint2 !== '-' ? 1 : 0);
-    const whiteCount = (target.whitePoint1 !== '-' ? 1 : 0) + (target.whitePoint2 !== '-' ? 1 : 0);
-
-    if (redCount > whiteCount) {
+    // 不戦勝(○2つ)が選ばれた場合の自動処理
+    if (field === 'redPoint1' && value === '不戦勝(○2つ)') {
+      target.redPoint2 = '不戦勝(○2つ)';
+      target.whitePoint1 = '-';
+      target.whitePoint2 = '-';
       target.winner = '赤勝ち';
-    } else if (whiteCount > redCount) {
+    } else if (field === 'whitePoint1' && value === '不戦勝(○2つ)') {
+      target.whitePoint2 = '不戦勝(○2つ)';
+      target.redPoint1 = '-';
+      target.redPoint2 = '-';
       target.winner = '白勝ち';
-    } else if (redCount === 2 && whiteCount === 2) {
-      target.winner = '引き分け';
-    } else if (redCount === 0 && whiteCount === 0) {
-      target.winner = '-';
     } else {
-      if (target.redPoint1 !== '-' && target.whitePoint1 !== '-') {
+      const redCount = (target.redPoint1 !== '-' ? 1 : 0) + (target.redPoint2 !== '-' ? 1 : 0);
+      const whiteCount = (target.whitePoint1 !== '-' ? 1 : 0) + (target.whitePoint2 !== '-' ? 1 : 0);
+
+      if (redCount > whiteCount) {
+        target.winner = '赤勝ち';
+      } else if (whiteCount > redCount) {
+        target.winner = '白勝ち';
+      } else if (redCount === 2 && whiteCount === 2) {
         target.winner = '引き分け';
+      } else if (redCount === 0 && whiteCount === 0) {
+        target.winner = '-';
+      } else {
+        if (target.redPoint1 !== '-' && target.whitePoint1 !== '-') {
+          target.winner = '引き分け';
+        }
       }
     }
 
@@ -69,15 +83,23 @@ export default function KendoTeamScoreApp() {
   const updateDaihyo = (field: string, value: string) => {
     const target = { ...daihyoMatch, [field]: value };
 
-    const redCount = (target.redPoint1 !== '-' ? 1 : 0) + (target.redPoint2 !== '-' ? 1 : 0);
-    const whiteCount = (target.whitePoint1 !== '-' ? 1 : 0) + (target.whitePoint2 !== '-' ? 1 : 0);
-
-    if (redCount > whiteCount) {
+    if (field === 'redPoint1' && value === '不戦勝(○2つ)') {
+      target.redPoint2 = '不戦勝(○2つ)';
       target.winner = '赤勝ち';
-    } else if (whiteCount > redCount) {
+    } else if (field === 'whitePoint1' && value === '不戦勝(○2つ)') {
+      target.whitePoint2 = '不戦勝(○2つ)';
       target.winner = '白勝ち';
-    } else if (redCount === 0 && whiteCount === 0) {
-      target.winner = '-';
+    } else {
+      const redCount = (target.redPoint1 !== '-' ? 1 : 0) + (target.redPoint2 !== '-' ? 1 : 0);
+      const whiteCount = (target.whitePoint1 !== '-' ? 1 : 0) + (target.whitePoint2 !== '-' ? 1 : 0);
+
+      if (redCount > whiteCount) {
+        target.winner = '赤勝ち';
+      } else if (whiteCount > redCount) {
+        target.winner = '白勝ち';
+      } else if (redCount === 0 && whiteCount === 0) {
+        target.winner = '-';
+      }
     }
 
     setDaihyoMatch(target);
@@ -125,17 +147,24 @@ export default function KendoTeamScoreApp() {
     }
   }
 
+  // 要望対応：データ一括クリア時に大会名、日付、チーム名もすべて空にする
   const handleClear = () => {
-    if (window.confirm('スコアをリセットしますか？')) {
+    if (window.confirm('大会名、チーム名、すべてのスコアをリセットしますか？')) {
+      setTournamentName('');
+      setMatchDate('');
+      setTeamRed('');
+      setTeamWhite('');
       setMatches(matches.map(m => ({
         ...m,
+        redPlayer: '',
+        whitePlayer: '',
         redPoint1: '-', redPoint2: '-', whitePoint1: '-', whitePoint2: '-', winner: '-'
       })));
       setDaihyoMatch({ redPlayer: '', whitePlayer: '', redPoint1: '-', redPoint2: '-', whitePoint1: '-', whitePoint2: '-', winner: '-' });
     }
   };
 
-  // Excelコピー機能（技を個別のセルや見やすい形式で出力）
+  // Excelコピー機能
   const handleCopyExcel = () => {
     const allPositions = ['先鋒', '次鋒', '中堅', '副将', '大将', '代表戦'];
     
@@ -158,7 +187,6 @@ export default function KendoTeamScoreApp() {
     const posRow = `ポジション\t` + allPositions.join('\t') + `\t総合結果`;
     const redPlayerRow = `赤(${teamRed}) 選手\t` + allMatchData.map(m => m.redPlayer).join('\t') + `\t赤 ${totals.redWins}勝 ${totals.redIppons}本`;
     
-    // 技を明確に「1本目 / 2本目」として出力する行
     const redTech1Row = `赤 取得技(1本目)\t` + allMatchData.map(m => m.redPoint1).join('\t');
     const redTech2Row = `赤 取得技(2本目)\t` + allMatchData.map(m => m.redPoint2).join('\t');
     const whiteTech1Row = `白 取得技(1本目)\t` + allMatchData.map(m => m.whitePoint1).join('\t');
@@ -202,9 +230,9 @@ export default function KendoTeamScoreApp() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff3cd', padding: '10px 15px', borderRadius: '8px', fontSize: '15px', fontWeight: 'bold', marginBottom: '15px', border: '1px solid #ffeeba' }}>
         <div>
-          <span style={{ color: '#d9534f' }}>{teamRed}（赤）: {totals.redWins}勝 ({totals.redIppons}本)</span>
+          <span style={{ color: '#d9534f' }}>{teamRed || '赤チーム'}（赤）: {totals.redWins}勝 ({totals.redIppons}本)</span>
           <span style={{ margin: '0 10px' }}>—</span>
-          <span style={{ color: '#0275d8' }}>{teamWhite}（白）: {totals.whiteWins}勝 ({totals.whiteIppons}本)</span>
+          <span style={{ color: '#0275d8' }}>{teamWhite || '白チーム'}（白）: {totals.whiteWins}勝 ({totals.whiteIppons}本)</span>
         </div>
         <div style={{ background: '#343a40', color: '#fff', padding: '4px 10px', borderRadius: '4px', fontSize: '14px' }}>
           判定: {matchStatus}
