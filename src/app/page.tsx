@@ -14,12 +14,12 @@ type MatchData = {
 
 // 個人戦データの型
 type IndividualMatch = {
-  round: string;       // 回戦 (例: 1回戦, 準決勝 など)
-  myPlayer: string;    // 高川の我が子の名前（選択）
-  opponentName: string;// 相手選手名（手入力）
+  round: string;          // 回戦 (例: 1回戦, 準決勝 など)
+  myPlayer: string;       // 高川の我が子の名前（選択）
+  opponentName: string;   // 相手選手名（手入力）
   opponentSchool: string; // 相手校名（手入力）
-  myScores: string[];  // 自分の技 (2本分)
-  oppScores: string[]; // 相手の技 (2本分)
+  myScores: string[];     // 自分の技 (2本分)
+  oppScores: string[];    // 相手の技 (2本分)
   resultOverride: string;
 };
 
@@ -182,11 +182,11 @@ export default function KendoScoreApp() {
     return "引き分け";
   };
 
-  // Excelコピー機能（タブに応じて切り替え）
+  // Excelコピー機能（Excelの枠に次々貼り付けできるよう、見出しを省いたデータ行のみを出力）
   const handleCopyForExcel = () => {
     if (activeTab === "team") {
-      let tsv = "大会名\t" + (tournamentName || "（未入力）") + "\t日付\t" + (date || "（未入力）") + "\n";
-      tsv += "赤チーム\t高川\t白チーム\t" + (whiteTeamName || "（未入力）") + "\n";
+      let tsv = "大会名\t" + (tournamentName || "") + "\t日付\t" + (date || "") + "\n";
+      tsv += "赤チーム\t高川\t白チーム\t" + (whiteTeamName || "") + "\n";
       tsv += "結果\t高川 (" + redTotalWins + "勝 " + redTotalIppon + "本) - " + (whiteTeamName || "白チーム") + " (" + whiteTotalWins + "勝 " + whiteTotalIppon + "本) 【" + overallStatus + "】\n\n";
 
       tsv += "対戦\t" + POSITIONS.join("\t") + "\n";
@@ -195,21 +195,35 @@ export default function KendoScoreApp() {
         const r = getMatchResult(matches[i]);
         return "赤:[" + matches[i].redScores.join(",") + "] 白:[" + matches[i].whiteScores.join(",") + "] (" + r + ")";
       }).join("\t") + "\n";
-      tsv += "白: " + (whiteTeamName || "白チーム") + "\t" + POSITIONS.map((_, i) => whitePlayers[i] || "（未入力）").join("\t") + "\n";
+      tsv += "白: " + (whiteTeamName || "白チーム") + "\t" + POSITIONS.map((_, i) => whitePlayers[i] || "").join("\t") + "\n";
 
       navigator.clipboard.writeText(tsv).then(() => {
         alert("団体戦のExcel用データをコピーしました！");
       });
     } else {
-      let tsv = "【個人戦記録】\t大会名: " + (indivTournament || "（未入力）") + "\t日付: " + (indivDate || "（未入力）") + "\n\n";
-      tsv += "回戦\t高川選手名\t対戦相手校\t対戦相手名\t自分スコア\t相手スコア\t結果\n";
+      // 個人戦：各試合データをタブ区切りの値のみ（1行ずつ）にしてコピー
+      let tsv = "";
       individualMatches.forEach((m) => {
         const res = getIndivResult(m);
-        tsv += m.round + "\t" + m.myPlayer + "\t" + (m.opponentSchool || "") + "\t" + (m.opponentName || "") + "\t[" + m.myScores.join(",") + "]\t[" + m.oppScores.join(",") + "]\t" + res + "\n";
+        // [大会名, 日付, 回戦, 我が子名, 相手校, 相手選手名, 自分の技1, 自分の技2, 相手の技1, 相手の技2, 結果] の順番で1行ずつ
+        const row = [
+          indivTournament || "",
+          indivDate || "",
+          m.round,
+          m.myPlayer,
+          m.opponentSchool || "",
+          m.opponentName || "",
+          m.myScores[0],
+          m.myScores[1],
+          m.oppScores[0],
+          m.oppScores[1],
+          res,
+        ];
+        tsv += row.join("\t") + "\n";
       });
 
       navigator.clipboard.writeText(tsv).then(() => {
-        alert("個人戦のExcel用データをコピーしました！");
+        alert("個人戦のExcel用データ（枠に貼り付け用）をコピーしました！");
       });
     }
   };
@@ -660,7 +674,7 @@ export default function KendoScoreApp() {
           onClick={handleCopyForExcel}
           className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow flex items-center justify-center gap-2 transition"
         >
-          <span>📋</span> {activeTab === "team" ? "団体戦のExcel用データをコピー" : "個人戦のExcel用データをコピー"}
+          <span>📋</span> {activeTab === "team" ? "団体戦のExcel用データをコピー" : "個人戦のExcel用データをコピー（枠用）"}
         </button>
         <button
           onClick={handleClear}
