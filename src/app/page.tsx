@@ -60,13 +60,13 @@ export default function KendoScoreApp() {
     }))
   );
 
-  // --- 個人戦用の状態 ---
+  // --- 個人戦用の状態（安野をデフォルトに設定） ---
   const [indivTournament, setIndivTournament] = useState("");
   const [indivDate, setIndivDate] = useState("");
   const [individualMatches, setIndividualMatches] = useState<IndividualMatch[]>([
     {
       round: "1回戦",
-      myPlayer: DEFAULT_RED_MEMBERS[0],
+      myPlayer: "安野",
       opponentName: "",
       opponentSchool: "",
       myScores: ["-", "-"],
@@ -157,7 +157,7 @@ export default function KendoScoreApp() {
       ...individualMatches,
       {
         round: "2回戦",
-        myPlayer: DEFAULT_RED_MEMBERS[0],
+        myPlayer: "安野",
         opponentName: "",
         opponentSchool: "",
         myScores: ["-", "-"],
@@ -240,7 +240,7 @@ export default function KendoScoreApp() {
       });
 
       navigator.clipboard.writeText(tsv).then(() => {
-        alert("個人戦の詳細技データ（枠用）をコピーしました！");
+        alert("個人戦の詳細技データをコピーしました！");
       });
     }
   };
@@ -266,7 +266,7 @@ export default function KendoScoreApp() {
         setIndividualMatches([
           {
             round: "1回戦",
-            myPlayer: DEFAULT_RED_MEMBERS[0],
+            myPlayer: "安野",
             opponentName: "",
             opponentSchool: "",
             myScores: ["-", "-"],
@@ -556,9 +556,9 @@ export default function KendoScoreApp() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-3">
-                    {/* 高川の選手選択 */}
+                    {/* 高川の選手選択（我が子表示を削除） */}
                     <div className="bg-red-50/50 p-3 rounded border border-red-200">
-                      <label className="block font-semibold text-red-700 mb-1">選手（高川）:</label>
+                      <label className="block font-semibold text-red-700 mb-1">高川 選手:</label>
                       <select
                         className="w-full border rounded p-1.5 text-xs bg-white font-medium mb-2"
                         value={m.myPlayer}
