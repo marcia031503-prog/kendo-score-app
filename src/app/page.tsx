@@ -34,7 +34,7 @@ type MatchData = {
 // 個人戦データの型
 type IndividualMatch = {
   round: string;          // 回戦 (例: 1回戦, 準決勝 など)
-  myPlayer: string;       // 高川の我が子の名前（選択）
+  myPlayer: string;       // 高川の選手名（選択）
   opponentName: string;   // 相手選手名（手入力）
   opponentSchool: string; // 相手校名（手入力）
   myScores: string[];     // 自分の技 (2本分)
@@ -60,7 +60,7 @@ export default function KendoScoreApp() {
     }))
   );
 
-  // --- 個人戦用の状態（我が子専用） ---
+  // --- 個人戦用の状態 ---
   const [indivTournament, setIndivTournament] = useState("");
   const [indivDate, setIndivDate] = useState("");
   const [individualMatches, setIndividualMatches] = useState<IndividualMatch[]>([
@@ -304,7 +304,7 @@ export default function KendoScoreApp() {
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
-          👤 個人戦モード（我が子専用）
+          👤 個人戦モード
         </button>
       </div>
 
@@ -556,9 +556,9 @@ export default function KendoScoreApp() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-3">
-                    {/* 自分（高川メンバーから選択） */}
+                    {/* 高川の選手選択 */}
                     <div className="bg-red-50/50 p-3 rounded border border-red-200">
-                      <label className="block font-semibold text-red-700 mb-1">我が子（高川）:</label>
+                      <label className="block font-semibold text-red-700 mb-1">選手（高川）:</label>
                       <select
                         className="w-full border rounded p-1.5 text-xs bg-white font-medium mb-2"
                         value={m.myPlayer}
