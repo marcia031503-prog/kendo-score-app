@@ -6,6 +6,25 @@ import React, { useState } from "react";
 const DEFAULT_RED_MEMBERS = ["山本", "松田", "山内", "橋本", "安野", "重村"];
 const POSITIONS = ["先鋒", "次鋒", "中堅", "副将", "大将", "代表戦"];
 
+// 詳細な技の選択肢
+const WAZA_OPTIONS = [
+  "-",
+  "面",
+  "小手",
+  "胴",
+  "突",
+  "引き面",
+  "引き小手",
+  "引き胴",
+  "飛び込み面",
+  "飛び込み小手",
+  "返し胴",
+  "抜き面",
+  "出頭面",
+  "反則",
+  "不戦勝(○2つ)",
+];
+
 type MatchData = {
   redScores: string[];
   whiteScores: string[];
@@ -182,7 +201,7 @@ export default function KendoScoreApp() {
     return "引き分け";
   };
 
-  // Excelコピー機能（Excelの枠に次々貼り付けできるよう、見出しを省いたデータ行のみを出力）
+  // Excelコピー機能
   const handleCopyForExcel = () => {
     if (activeTab === "team") {
       let tsv = "大会名\t" + (tournamentName || "") + "\t日付\t" + (date || "") + "\n";
@@ -201,11 +220,9 @@ export default function KendoScoreApp() {
         alert("団体戦のExcel用データをコピーしました！");
       });
     } else {
-      // 個人戦：各試合データをタブ区切りの値のみ（1行ずつ）にしてコピー
       let tsv = "";
       individualMatches.forEach((m) => {
         const res = getIndivResult(m);
-        // [大会名, 日付, 回戦, 我が子名, 相手校, 相手選手名, 自分の技1, 自分の技2, 相手の技1, 相手の技2, 結果] の順番で1行ずつ
         const row = [
           indivTournament || "",
           indivDate || "",
@@ -223,7 +240,7 @@ export default function KendoScoreApp() {
       });
 
       navigator.clipboard.writeText(tsv).then(() => {
-        alert("個人戦のExcel用データ（枠に貼り付け用）をコピーしました！");
+        alert("個人戦の詳細技データ（枠用）をコピーしました！");
       });
     }
   };
@@ -554,33 +571,25 @@ export default function KendoScoreApp() {
                         ))}
                       </select>
 
-                      <label className="block font-semibold text-red-700 mb-1">自分の技:</label>
+                      <label className="block font-semibold text-red-700 mb-1">自分の技（詳細）:</label>
                       <div className="flex gap-1">
                         <select
                           className="w-1/2 border rounded p-1 bg-white"
                           value={m.myScores[0]}
                           onChange={(e) => handleIndivScoreChange(index, "my", 0, e.target.value)}
                         >
-                          <option value="-">-</option>
-                          <option value="面">面</option>
-                          <option value="小手">小手</option>
-                          <option value="胴">胴</option>
-                          <option value="突">突</option>
-                          <option value="反則">反則</option>
-                          <option value="不戦勝(○2つ)">不戦勝(○2つ)</option>
+                          {WAZA_OPTIONS.map((waza, wIdx) => (
+                            <option key={wIdx} value={waza}>{waza}</option>
+                          ))}
                         </select>
                         <select
                           className="w-1/2 border rounded p-1 bg-white"
                           value={m.myScores[1]}
                           onChange={(e) => handleIndivScoreChange(index, "my", 1, e.target.value)}
                         >
-                          <option value="-">-</option>
-                          <option value="面">面</option>
-                          <option value="小手">小手</option>
-                          <option value="胴">胴</option>
-                          <option value="突">突</option>
-                          <option value="反則">反則</option>
-                          <option value="不戦勝(○2つ)">不戦勝(○2つ)</option>
+                          {WAZA_OPTIONS.map((waza, wIdx) => (
+                            <option key={wIdx} value={waza}>{waza}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -610,33 +619,25 @@ export default function KendoScoreApp() {
                         </div>
                       </div>
 
-                      <label className="block font-semibold text-blue-700 mb-1">相手の技:</label>
+                      <label className="block font-semibold text-blue-700 mb-1">相手の技（詳細）:</label>
                       <div className="flex gap-1">
                         <select
                           className="w-1/2 border rounded p-1 bg-white"
                           value={m.oppScores[0]}
                           onChange={(e) => handleIndivScoreChange(index, "opp", 0, e.target.value)}
                         >
-                          <option value="-">-</option>
-                          <option value="面">面</option>
-                          <option value="小手">小手</option>
-                          <option value="胴">胴</option>
-                          <option value="突">突</option>
-                          <option value="反則">反則</option>
-                          <option value="不戦勝(○2つ)">不戦勝(○2つ)</option>
+                          {WAZA_OPTIONS.map((waza, wIdx) => (
+                            <option key={wIdx} value={waza}>{waza}</option>
+                          ))}
                         </select>
                         <select
                           className="w-1/2 border rounded p-1 bg-white"
                           value={m.oppScores[1]}
                           onChange={(e) => handleIndivScoreChange(index, "opp", 1, e.target.value)}
                         >
-                          <option value="-">-</option>
-                          <option value="面">面</option>
-                          <option value="小手">小手</option>
-                          <option value="胴">胴</option>
-                          <option value="突">突</option>
-                          <option value="反則">反則</option>
-                          <option value="不戦勝(○2つ)">不戦勝(○2つ)</option>
+                          {WAZA_OPTIONS.map((waza, wIdx) => (
+                            <option key={wIdx} value={waza}>{waza}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -674,7 +675,7 @@ export default function KendoScoreApp() {
           onClick={handleCopyForExcel}
           className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow flex items-center justify-center gap-2 transition"
         >
-          <span>📋</span> {activeTab === "team" ? "団体戦のExcel用データをコピー" : "個人戦のExcel用データをコピー（枠用）"}
+          <span>📋</span> {activeTab === "team" ? "団体戦のExcel用データをコピー" : "個人戦の詳細技データをコピー（枠用）"}
         </button>
         <button
           onClick={handleClear}
