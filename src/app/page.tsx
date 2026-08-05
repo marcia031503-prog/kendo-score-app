@@ -33,17 +33,16 @@ type MatchData = {
 
 // 個人戦データの型
 type IndividualMatch = {
-  round: string;          // 回戦 (例: 1回戦, 準決勝 など)
-  myPlayer: string;       // 高川の選手名（選択）
-  opponentName: string;   // 相手選手名（手入力）
-  opponentSchool: string; // 相手校名（手入力）
+  round: string;          // 回戦
+  myPlayer: string;       // 高川の選手名（初期値: 安野）
+  opponentName: string;   // 相手選手名
+  opponentSchool: string; // 相手校名
   myScores: string[];     // 自分の技 (2本分)
   oppScores: string[];    // 相手の技 (2本分)
   resultOverride: string;
 };
 
 export default function KendoScoreApp() {
-  // モード切り替え: "team" (団体戦) または "individual" (個人戦)
   const [activeTab, setActiveTab] = useState<"team" | "individual">("team");
 
   // --- 団体戦用の状態 ---
@@ -75,7 +74,6 @@ export default function KendoScoreApp() {
     },
   ]);
 
-  // 団体戦の変更ハンドラー
   const handleRedPlayerChange = (index: number, name: string) => {
     const updated = [...redPlayers];
     updated[index] = name;
@@ -124,7 +122,6 @@ export default function KendoScoreApp() {
     return "引き分け";
   };
 
-  // 団体戦トータル計算
   let redTotalWins = 0;
   let redTotalIppon = 0;
   let whiteTotalWins = 0;
@@ -151,7 +148,6 @@ export default function KendoScoreApp() {
   else if (redTotalWins === whiteTotalWins && redTotalIppon > whiteTotalIppon) overallStatus = "赤チームの勝利（本数勝ち）";
   else if (redTotalWins === whiteTotalWins && whiteTotalIppon > redTotalIppon) overallStatus = "白チームの勝利（本数勝ち）";
 
-  // --- 個人戦の操作ハンドラー ---
   const handleAddIndivMatch = () => {
     setIndividualMatches([
       ...individualMatches,
@@ -201,7 +197,6 @@ export default function KendoScoreApp() {
     return "引き分け";
   };
 
-  // Excelコピー機能
   const handleCopyForExcel = () => {
     if (activeTab === "team") {
       let tsv = "大会名\t" + (tournamentName || "") + "\t日付\t" + (date || "") + "\n";
@@ -556,7 +551,7 @@ export default function KendoScoreApp() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs mb-3">
-                    {/* 高川の選手選択（我が子表示を削除） */}
+                    {/* 高川の選手選択 */}
                     <div className="bg-red-50/50 p-3 rounded border border-red-200">
                       <label className="block font-semibold text-red-700 mb-1">高川 選手:</label>
                       <select
