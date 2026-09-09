@@ -2,16 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 
-// タイマーと、よく使う技ボタン ＋ プルダウン技選択を両立させたコンポーネント
+// 技選択をプルダウンに一本化したタイマー・スコアコンポーネント
 function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
   const [timeLeft, setTimeLeft] = useState(180);
   const [isRunning, setIsRunning] = useState(false);
   
-  // クイック打突用（よく使う4本）
-  const quickWazas = ['面', 'コテ', '胴', 'ツキ'];
-
-  // 詳細技用のリスト（基本の4本を除外）
+  // すべての技をまとめたリスト
   const allWazas = [
+    '面', 'コテ', '胴', 'ツキ',
     '飛び込み面', '引き面', '小手面', '相面', '返し面', '相小手面',
     '飛び込みコテ', '引きコテ', '出小手',
     '返し胴', '抜き胴', '引きツキ'
@@ -61,25 +59,10 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
         </div>
       </div>
 
-      {/* ================= 赤チーム側スコアエリア ================= */}
+      {/* ================= 上側：赤チーム側スコアエリア ================= */}
       <div className="bg-red-50/70 border border-red-200 rounded-lg p-2 space-y-1.5">
         <div className="text-[10px] font-bold text-red-700">🔴 赤チーム記録</div>
-        
-        {/* ワンタップ物理ボタン（面・コテ・胴・ツキ） */}
-        <div className="grid grid-cols-4 gap-1">
-          {quickWazas.map((w) => (
-            <button
-              key={w}
-              onClick={() => onAddWaza('red', w)}
-              className="bg-red-600 hover:bg-red-700 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
-            >
-              {w}
-            </button>
-          ))}
-        </div>
-
-        {/* その他の技：プルダウン ＋ 記録ボタン */}
-        <div className="flex flex-col gap-1 pt-1 border-t border-red-200">
+        <div className="flex flex-col gap-1.5">
           <select
             value={redSelectedWaza}
             onChange={(e) => setRedSelectedWaza(e.target.value)}
@@ -91,32 +74,17 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
           </select>
           <button
             onClick={() => onAddWaza('red', redSelectedWaza)}
-            className="w-full bg-red-700 hover:bg-red-800 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
+            className="w-full bg-red-600 hover:bg-red-700 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
           >
-            + 詳細技を記録
+            + 記録
           </button>
         </div>
       </div>
 
-      {/* ================= 白チーム側スコアエリア ================= */}
+      {/* ================= 下側：白チーム側スコアエリア ================= */}
       <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-2 space-y-1.5">
         <div className="text-[10px] font-bold text-indigo-700">🔵 白チーム記録</div>
-        
-        {/* ワンタップ物理ボタン（面・コテ・胴・ツキ） */}
-        <div className="grid grid-cols-4 gap-1">
-          {quickWazas.map((w) => (
-            <button
-              key={w}
-              onClick={() => onAddWaza('white', w)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
-            >
-              {w}
-            </button>
-          ))}
-        </div>
-
-        {/* その他の技：プルダウン ＋ 記録ボタン */}
-        <div className="flex flex-col gap-1 pt-1 border-t border-indigo-200">
+        <div className="flex flex-col gap-1.5">
           <select
             value={whiteSelectedWaza}
             onChange={(e) => setWhiteSelectedWaza(e.target.value)}
@@ -128,9 +96,9 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
           </select>
           <button
             onClick={() => onAddWaza('white', whiteSelectedWaza)}
-            className="w-full bg-indigo-700 hover:bg-indigo-800 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1 rounded font-bold shadow transition text-center"
           >
-            + 詳細技を記録
+            + 記録
           </button>
         </div>
       </div>
@@ -445,7 +413,7 @@ export default function KendoApp() {
                       </td>
                     ))}
                     <td className="p-2 font-bold text-red-700">
-                      {teamSummary.redWins}勝 / {teamSummary.redIppons}本
+                      {teamTotalIppon}本 / {teamTotalWins}勝
                     </td>
                   </tr>
 
