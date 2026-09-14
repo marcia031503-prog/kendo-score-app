@@ -228,52 +228,43 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         </div>
       </div>
 
-      {/* 赤チーム記録 */}
-      <div className="bg-red-50/70 border border-red-200 rounded-lg p-1.5 space-y-1">
-        <div className="text-[10px] font-bold text-red-700 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block"></span>赤チーム記録
-        </div>
+      {/* 赤チーム操作 */}
+      <div className="bg-red-50/50 border border-red-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map(w => (
             <button key={w} onClick={() => onAddWaza('red', w)} className="bg-red-600 hover:bg-red-700 text-white text-[10px] py-1 rounded font-bold">{w}</button>
           ))}
         </div>
-        <div className="flex flex-col gap-1 pt-1 border-t border-red-200">
-          <select value={redSelected} onChange={e => setRedSelected(e.target.value)} className="w-full border border-red-300 rounded px-1.5 py-1 text-[11px] font-bold bg-white text-red-800">
+        <div className="flex gap-1">
+          <select value={redSelected} onChange={e => setRedSelected(e.target.value)} className="flex-1 border border-red-300 rounded px-1.5 py-1 text-[10px] font-bold bg-white text-red-800">
             {allWazas.map(w => <option key={w} value={w}>{w}</option>)}
           </select>
-          <button onClick={() => onAddWaza('red', redSelected)} className="w-full bg-red-700 hover:bg-red-800 text-white text-[10px] py-1 rounded font-bold">
-            + 詳細技を記録
+          <button onClick={() => onAddWaza('red', redSelected)} className="bg-red-700 hover:bg-red-800 text-white text-[10px] px-2 py-1 rounded font-bold">
+            赤追加
           </button>
         </div>
       </div>
 
-      {/* 白チーム記録 */}
-      <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-1.5 space-y-1">
-        <div className="text-[10px] font-bold text-indigo-700 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block"></span>白チーム記録
-        </div>
+      {/* 白チーム操作 */}
+      <div className="bg-indigo-50/50 border border-indigo-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map(w => (
             <button key={w} onClick={() => onAddWaza('white', w)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1 rounded font-bold">{w}</button>
           ))}
         </div>
-        <div className="flex flex-col gap-1 pt-1 border-t border-indigo-200">
-          <select value={whiteSelected} onChange={e => setWhiteSelected(e.target.value)} className="w-full border border-indigo-300 rounded px-1.5 py-1 text-[11px] font-bold bg-white text-indigo-800">
+        <div className="flex gap-1">
+          <select value={whiteSelected} onChange={e => setWhiteSelected(e.target.value)} className="flex-1 border border-indigo-300 rounded px-1.5 py-1 text-[10px] font-bold bg-white text-indigo-800">
             {allWazas.map(w => <option key={w} value={w}>{w}</option>)}
           </select>
-          <button onClick={() => onAddWaza('white', whiteSelected)} className="w-full bg-indigo-700 hover:bg-indigo-800 text-white text-[10px] py-1 rounded font-bold">
-            + 詳細技を記録
+          <button onClick={() => onAddWaza('white', whiteSelected)} className="bg-indigo-700 hover:bg-indigo-800 text-white text-[10px] px-2 py-1 rounded font-bold">
+            白追加
           </button>
         </div>
       </div>
 
       {/* 一本履歴 */}
       <div className="pt-1 border-t border-gray-100 text-[10px] text-gray-500">
-        <div className="font-bold mb-0.5 text-gray-600">この試合の一本履歴:</div>
-        {logs.length === 0 ? (
-          <div>まだ記録はありません</div>
-        ) : (
+        {logs.length > 0 && (
           <div className="space-y-0.5 max-h-16 overflow-y-auto">
             {logs.map(l => (
               <div
