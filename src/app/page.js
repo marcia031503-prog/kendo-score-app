@@ -31,15 +31,16 @@ export default function KendoScoreApp() {
     chuken: '山内',
     fukusho: '橋本',
     taisho: '安野',
+    daicho: '',
   });
 
-  // 白チームは完全自由記入（初期値：空欄）
   const [whitePlayers, setWhitePlayers] = useState({
     senpo: '',
     jiho: '',
     chuken: '',
     fukusho: '',
     taisho: '',
+    daicho: '',
   });
 
   const [matchLogs, setMatchLogs] = useState({
@@ -48,6 +49,7 @@ export default function KendoScoreApp() {
     chuken: [],
     fukusho: [],
     taisho: [],
+    daicho: [],
   });
 
   const handleAddWaza = (position, team, waza) => {
@@ -69,6 +71,7 @@ export default function KendoScoreApp() {
     { key: 'chuken', label: '中堅' },
     { key: 'fukusho', label: '副将' },
     { key: 'taisho', label: '大将' },
+    { key: 'daicho', label: '代表戦' },
   ];
 
   return (
@@ -104,7 +107,7 @@ export default function KendoScoreApp() {
       </div>
 
       <div className="overflow-x-auto bg-white border border-gray-300 rounded-xl shadow-sm">
-        <table className="w-full border-collapse text-left min-w-[800px]">
+        <table className="w-full border-collapse text-left min-w-[960px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
               <th className="p-2 border-r font-bold w-24">項目</th>
@@ -131,19 +134,32 @@ export default function KendoScoreApp() {
               </td>
               {positions.map((p) => (
                 <td key={p.key} className="p-2 border-r">
-                  <select
-                    value={redPlayers[p.key]}
-                    onChange={(e) =>
-                      setRedPlayers({ ...redPlayers, [p.key]: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded px-1.5 py-1 bg-white font-bold"
-                  >
-                    {presetPlayers.map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
+                  {p.key === 'daicho' ? (
+                    <input
+                      type="text"
+                      value={redPlayers[p.key]}
+                      onChange={(e) =>
+                        setRedPlayers({ ...redPlayers, [p.key]: e.target.value })
+                      }
+                      placeholder="選手名"
+                      className="w-full border border-gray-300 rounded px-1.5 py-1 bg-white focus:outline-none focus:border-red-500 font-bold"
+                    />
+                  ) : (
+                    <select
+                      value={redPlayers[p.key]}
+                      onChange={(e) =>
+                        setRedPlayers({ ...redPlayers, [p.key]: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded px-1.5 py-1 bg-white font-bold"
+                    >
+                      <option value="">(未選択)</option>
+                      {presetPlayers.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </td>
               ))}
             </tr>
@@ -163,7 +179,7 @@ export default function KendoScoreApp() {
               ))}
             </tr>
 
-            {/* 白チーム行（完全自由記入・初期値空） */}
+            {/* 白チーム行 */}
             <tr className="bg-indigo-50/30">
               <td className="p-2 border-r font-bold text-indigo-600">
                 <div className="flex items-center gap-1">
@@ -242,7 +258,7 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         </div>
       </div>
 
-      {/* 赤チーム記録（ラベルなし） */}
+      {/* 赤チーム記録 */}
       <div className="bg-red-50/70 border border-red-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
@@ -276,7 +292,7 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         </div>
       </div>
 
-      {/* 白チーム記録（ラベルなし） */}
+      {/* 白チーム記録 */}
       <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
