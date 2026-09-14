@@ -49,7 +49,6 @@ export default function KendoScoreApp() {
     Object.values(matchLogs).forEach(logs => {
       logs.forEach(l => { if (l.team === team) hon++; });
     });
-    // 簡易勝数カウント（各ポジションで一本多い方を勝数としてカウントするロジックや合算も可）
     let wins = 0;
     positions.forEach(p => {
       const redHon = (matchLogs[p.key] || []).filter(l => l.team === 'red').length;
@@ -64,10 +63,9 @@ export default function KendoScoreApp() {
   const whiteScore = calculateScore('white');
 
   const handleCopyExcelTable = () => {
-    const headers = ['項目', ...positions.map(p => p.label)];
-    const redRow = [redTeamName, ...positions.map(p => redPlayers[p.key])];
-    const whiteRow = [whiteTeamName, ...positions.map(p => whitePlayers[p.key])];
-    const scoreRow = ['勝敗/本数', `${redScore.wins}勝/${redScore.hon}本`, '', '', '', '', `${whiteScore.wins}勝/${whiteScore.hon}本`];
+    const headers = ['項目/勝敗', ...positions.map(p => p.label), '合計'];
+    const redRow = [`赤:${redTeamName}`, ...positions.map(p => redPlayers[p.key]), `${redScore.wins}勝/${redScore.hon}本`];
+    const whiteRow = [`白:${whiteTeamName}`, ...positions.map(p => whitePlayers[p.key]), `${whiteScore.wins}勝/${whiteScore.hon}本`];
     navigator.clipboard.writeText([headers.join('\t'), redRow.join('\t'), whiteRow.join('\t')].join('\n'));
     alert('Excel貼付用の一覧表をコピーしました！');
   };
@@ -86,18 +84,17 @@ export default function KendoScoreApp() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setActiveTab('team')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'team' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'}`}>団体戦</button>
-          <button onClick={() => setActiveTab('individual')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'individual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}>個人戦</button>
-          <button onClick={() => setActiveTab('history')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'history' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300'}`}>試合履歴 (0)</button>
           <button onClick={() => setActiveTab('timer')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'timer' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-300'}`}>独立タイマー</button>
         </div>
       </div>
 
       <div className="overflow-x-auto bg-white border border-gray-300 rounded-xl shadow-sm">
-        <table className="w-full border-collapse text-left min-w-[1100px]">
+        <table className="w-full border-collapse text-left min-w-[1200px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
+              <th className="p-2 border-r font-bold w-40">チーム / 項目</th>
               {positions.map(p => (
-                <th key={p.key} className="p-2 border-r font-bold text-center w-40">{p.label}</th>
+                <th key={p.key} className="p-2 border-r font-bold text-center w-36">{p.label}</th>
               ))}
               <th className="p-2 font-bold text-center w-28 bg-gray-200">合計</th>
             </tr>
@@ -105,6 +102,14 @@ export default function KendoScoreApp() {
           <tbody>
             {/* 赤チーム選手選択行 */}
             <tr className="border-b bg-red-50/20">
+              <td className="p-2 border-r font-bold text-red-600 align-middle">
+                <input
+                  type="text"
+                  value={redTeamName}
+                  onChange={e => setRedTeamName(e.target.value)}
+                  className="w-full border border-red-300 rounded px-1.5 py-1 font-bold bg-white text-red-700"
+                />
+              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
                   {p.key === 'daicho' ? (
@@ -127,25 +132,36 @@ export default function KendoScoreApp() {
                   )}
                 </td>
               ))}
-              <td className="p-2 text-center font-bold text-red-600 bg-red-50/40">
+              <td className="p-2 text-center font-bold text-red-600 bg-red-50/45">
                 {redScore.wins}勝 / {redScore.hon}本
               </td>
             </tr>
 
             {/* 各ポジションのタイマー＆技記録カラム行 */}
             <tr className="border-b">
+              <td className="p-2 border-r text-center font-bold text-gray-500 bg-gray-50 align-middle">
+                タイマー &amp; 技
+              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-top">
                   <CompactMatchColumn logs={matchLogs[p.key] || []} onAddWaza={(team, w) => handleAddWaza(p.key, team, w)} />
                 </td>
               ))}
               <td className="p-2 text-center text-gray-400 bg-gray-50/50 align-middle">
-                各試合の勝敗
+                各試合の経過
               </td>
             </tr>
 
             {/* 白チーム選手入力行 */}
             <tr className="bg-indigo-50/20">
+              <td className="p-2 border-r font-bold text-indigo-600 align-middle">
+                <input
+                  type="text"
+                  value={whiteTeamName}
+                  onChange={e => setWhiteTeamName(e.target.value)}
+                  className="w-full border border-indigo-300 rounded px-1.5 py-1 font-bold bg-white text-indigo-700"
+                />
+              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
                   <input
@@ -157,7 +173,7 @@ export default function KendoScoreApp() {
                   />
                 </td>
               ))}
-              <td className="p-2 text-center font-bold text-indigo-600 bg-indigo-50/40">
+              <td className="p-2 text-center font-bold text-indigo-600 bg-indigo-50/45">
                 {whiteScore.wins}勝 / {whiteScore.hon}本
               </td>
             </tr>
@@ -252,7 +268,10 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         ) : (
           <div className="space-y-0.5 max-h-16 overflow-y-auto">
             {logs.map(l => (
-              <div key={l.id} className={l.team === 'red' ? 'text-red-600 font-semibold' : 'text-indigo-600 font-semibold'}>
+              <div
+                key={l.id}
+                className={l.team === 'red' ? 'text-red-600 font-semibold' : 'text-indigo-600 font-semibold'}
+              >
                 [{l.team === 'red' ? '赤' : '白'}] {l.waza}
               </div>
             ))}
