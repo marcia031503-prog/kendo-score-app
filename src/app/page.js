@@ -2,15 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-// タイマーと、よく使う技ボタン ＋ プルダウン技選択を両立させたコンポーネント
 function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
   const [timeLeft, setTimeLeft] = useState(180);
   const [isRunning, setIsRunning] = useState(false);
   
-  // クイック打突用（よく使う4本）
   const quickWazas = ['面', 'コテ', '胴', 'ツキ'];
-
-  // 詳細技用のリスト（基本の4本を除外）
   const allWazas = [
     '飛び込み面', '引き面', '小手面', '相面', '返し面', '相小手面',
     '飛び込みコテ', '引きコテ', '出小手',
@@ -40,7 +36,6 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
 
   return (
     <div className="bg-slate-50 border border-slate-300 rounded-lg p-2.5 space-y-2.5">
-      {/* タイマー表示 & 操作 */}
       <div className="flex items-center justify-between bg-white p-1.5 rounded border border-slate-200">
         <div className="text-base font-black text-slate-900 tracking-wider">
           {formatTime(timeLeft)}
@@ -61,11 +56,8 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
         </div>
       </div>
 
-      {/* ================= 赤チーム側スコアエリア ================= */}
       <div className="bg-red-50/70 border border-red-200 rounded-lg p-2 space-y-1.5">
-        <div className="text-[10px] font-bold text-red-700">🔴 赤チーム記録</div>
-        
-        {/* ワンタップ物理ボタン（面・コテ・胴・ツキ） */}
+        <div className="text-[10px] font-bold text-red-700">🔴 赤チーム記録 ({title})</div>
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
             <button
@@ -77,8 +69,6 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
             </button>
           ))}
         </div>
-
-        {/* その他の技：プルダウン ＋ 記録ボタン */}
         <div className="flex flex-col gap-1 pt-1 border-t border-red-200">
           <select
             value={redSelectedWaza}
@@ -98,11 +88,8 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
         </div>
       </div>
 
-      {/* ================= 白チーム側スコアエリア ================= */}
       <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-2 space-y-1.5">
-        <div className="text-[10px] font-bold text-indigo-700">🔵 白チーム記録</div>
-        
-        {/* ワンタップ物理ボタン（面・コテ・胴・ツキ） */}
+        <div className="text-[10px] font-bold text-indigo-700">🔵 白チーム記録 ({title})</div>
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
             <button
@@ -114,8 +101,6 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
             </button>
           ))}
         </div>
-
-        {/* その他の技：プルダウン ＋ 記録ボタン */}
         <div className="flex flex-col gap-1 pt-1 border-t border-indigo-200">
           <select
             value={whiteSelectedWaza}
@@ -135,7 +120,6 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
         </div>
       </div>
 
-      {/* 記録された履歴表示 */}
       <div className="space-y-1 pt-1 border-t border-slate-200">
         <div className="text-[10px] font-bold text-slate-500">この試合の一本履歴:</div>
         <div className="flex flex-wrap gap-1 min-h-[22px] items-center">
@@ -166,34 +150,30 @@ function MatchTimerAndScorer({ title, history, onAddWaza, onRemoveWaza }) {
 }
 
 export default function KendoApp() {
-  const [mode, setMode] = useState('team'); // 'team', 'individual', 'timer', 'archive'
+  const [mode, setMode] = useState('team');
   const [tournamentName, setTournamentName] = useState('');
   const [matchDate, setMatchDate] = useState('');
   
-  const playerOptions = ['重村', '山本', '山内', '橋本', '安野', '松田', '佐藤', '鈴木', '高橋', '田中'];
-
-  // 団体戦用ステート
+  // 指定されたメンバーのみ（田中佐藤鈴木高橋は除外）
+  const playerOptions = ['重村', '山本', '山内', '橋本', '安野', '松田'];
+  const [positions] = useState(['先鋒', '次鋒', '中堅', '副将', '大将', '代表戦']);
+  
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('');
-  const [positions] = useState(['先鋒', '次鋒', '中堅', '副将', '大将']);
   
-  const [redPlayers, setRedPlayers] = useState(['重村', '松田', '山内', '橋本', '安野']);
-  const [whitePlayers, setWhitePlayers] = useState(['', '', '', '', '']);
+  const [redPlayers, setRedPlayers] = useState(['重村', '松田', '山内', '', '', '']);
+  const [whitePlayers, setWhitePlayers] = useState(['', '', '', '', '', '']);
 
   const [teamMatches, setTeamMatches] = useState(
-    Array(5).fill(null).map(() => ({ history: [] }))
+    Array(6).fill(null).map(() => ({ history: [] }))
   );
 
-  // 個人戦用ステート
   const [indPlayerRed] = useState('安野');
   const [indPlayerWhite, setIndPlayerWhite] = useState('');
   const [indHistory, setIndHistory] = useState([]);
 
-  // メインの全体タイマー用ステート
   const [mainTimeLeft, setMainTimeLeft] = useState(180); 
   const [mainIsRunning, setMainIsRunning] = useState(false);
-
-  // 連続試合のストックリスト
   const [matchArchive, setMatchArchive] = useState([]);
 
   useEffect(() => {
@@ -214,7 +194,8 @@ export default function KendoApp() {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const getMatchResult = (history) => {
+  const getMatchResult = (history, redPlayer, whitePlayer) => {
+    if (!redPlayer && !whitePlayer && history.length === 0) return 'none';
     let redCount = 0;
     let whiteCount = 0;
     history.forEach((h) => {
@@ -225,17 +206,20 @@ export default function KendoApp() {
     if (redCount >= 2 || (redCount > whiteCount && (redCount + whiteCount >= 2))) return 'red';
     if (whiteCount >= 2 || (whiteCount > redCount && (redCount + whiteCount >= 2))) return 'white';
     if (redCount === 1 && whiteCount === 1) return 'draw';
+    if (redCount === 0 && whiteCount === 0 && (redPlayer || whitePlayer)) return 'draw';
     return 'none';
   };
 
   const calculateTeamSummary = () => {
     let redWins = 0, whiteWins = 0, redIppons = 0, whiteIppons = 0;
-    teamMatches.forEach((m) => {
+    teamMatches.forEach((m, idx) => {
+      const rP = redPlayers[idx];
+      const wP = whitePlayers[idx];
       m.history.forEach((h) => {
         if (h.side === 'red') redIppons++;
         if (h.side === 'white') whiteIppons++;
       });
-      const res = getMatchResult(m.history);
+      const res = getMatchResult(m.history, rP, wP);
       if (res === 'red') redWins++;
       else if (res === 'white') whiteWins++;
     });
@@ -255,13 +239,14 @@ export default function KendoApp() {
       scoreSummary: `${summary.redIppons}本(${summary.redWins}勝) ー ${summary.whiteIppons}本(${summary.whiteWins}勝)`,
       details: positions.map((pos, idx) => {
         const m = teamMatches[idx];
-        const rP = redPlayers[idx];
-        const wP = whitePlayers[idx] || '白選手';
+        const rP = redPlayers[idx] || (pos === '代表戦' ? '代表者未定' : '空欄(不出場)');
+        const wP = whitePlayers[idx] || (pos === '代表戦' ? '代表者未定' : '空欄(不出場)');
         const hStr = m.history.map((h, i) => `${i+1}本:${h.side === 'red' ? rP : wP}(${h.waza})`).join(', ');
-        const res = getMatchResult(m.history);
-        let resText = '引き分け';
+        const res = getMatchResult(m.history, redPlayers[idx], whitePlayers[idx]);
+        let resText = '不出場/未対戦';
         if (res === 'red') resText = `${teamRed}勝ち`;
-        if (res === 'white') resText = `${teamWhite || '白'}勝ち`;
+        else if (res === 'white') resText = `${teamWhite || '白'}勝ち`;
+        else if (res === 'draw') resText = '引き分け';
         return `${pos}: ${rP} vs ${wP} [${hStr || '技なし'}] → ${resText}`;
       }).join(' / ')
     };
@@ -347,7 +332,7 @@ export default function KendoApp() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto p-4 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
         <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-bold text-slate-500 mb-0.5">大会名</label>
@@ -411,7 +396,7 @@ export default function KendoApp() {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border-2 border-slate-800 overflow-x-auto">
-              <table className="w-full border-collapse text-center text-xs min-w-[950px]">
+              <table className="w-full border-collapse text-center text-xs min-w-[1200px]">
                 <thead>
                   <tr className="bg-slate-200 border-b-2 border-slate-800">
                     <th className="border-r border-slate-400 p-2 font-bold text-slate-700 w-28">項目</th>
@@ -422,7 +407,6 @@ export default function KendoApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* 赤チーム選手選択行 */}
                   <tr className="border-b border-slate-400 bg-red-50/20">
                     <td className="border-r border-slate-400 p-2 font-bold text-red-700 bg-red-50/50">
                       🔴 赤: {teamRed}
@@ -438,6 +422,7 @@ export default function KendoApp() {
                           }}
                           className="w-full border border-red-300 rounded p-1 text-xs font-bold text-center bg-white text-red-800"
                         >
+                          <option value="">--（空欄/不出場）--</option>
                           {playerOptions.map((p) => (
                             <option key={p} value={p}>{p}</option>
                           ))}
@@ -449,7 +434,6 @@ export default function KendoApp() {
                     </td>
                   </tr>
 
-                  {/* 試合タイマー＆ボタン＆技記録 */}
                   <tr className="border-b border-slate-400 bg-white">
                     <td className="border-r border-slate-400 p-2 font-bold text-slate-600 bg-slate-100">
                       タイマー & 技記録
@@ -480,7 +464,6 @@ export default function KendoApp() {
                     </td>
                   </tr>
 
-                  {/* 白チーム選手選択行 */}
                   <tr className="bg-indigo-50/20">
                     <td className="border-r border-slate-400 p-2 font-bold text-indigo-700 bg-indigo-50/50">
                       🔵 白: {teamWhite || '白チーム'}
@@ -495,7 +478,7 @@ export default function KendoApp() {
                             newP[idx] = e.target.value;
                             setWhitePlayers(newP);
                           }}
-                          placeholder={`${pos}選手名`}
+                          placeholder={pos === '代表戦' ? '代表者名(空欄可)' : '選手名(空欄可)'}
                           className="w-full border border-indigo-300 rounded p-1 text-xs font-bold text-center bg-white text-indigo-800"
                         />
                       </td>
@@ -521,7 +504,6 @@ export default function KendoApp() {
                 📥 この個人戦結果をストック
               </button>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-red-50 p-3 rounded-lg border border-red-200 space-y-2">
                 <label className="block text-xs font-bold text-red-600">赤選手</label>
@@ -529,7 +511,6 @@ export default function KendoApp() {
                   {indPlayerRed}
                 </div>
               </div>
-
               <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 space-y-2">
                 <label className="block text-xs font-bold text-indigo-600">白選手名（手入力）</label>
                 <input
@@ -541,7 +522,6 @@ export default function KendoApp() {
                 />
               </div>
             </div>
-
             <MatchTimerAndScorer
               title="個人戦 試合管理"
               history={indHistory}
@@ -565,7 +545,7 @@ export default function KendoApp() {
                     onClick={handleCopyArchiveForExcel}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-xs font-bold shadow transition"
                   >
-                    📋 全履歴をExcel用一括コピー
+                    📋 全履歴, Excel用一括コピー
                   </button>
                   <button
                     onClick={() => {
@@ -578,7 +558,6 @@ export default function KendoApp() {
                 </div>
               )}
             </div>
-
             {matchArchive.length === 0 ? (
               <div className="text-center py-12 text-slate-400 text-xs border border-dashed border-slate-300 rounded-lg">
                 まだストックされた試合はありません。
@@ -622,7 +601,6 @@ export default function KendoApp() {
             <div className="text-6xl font-black text-slate-900 tracking-wider bg-slate-100 py-6 rounded-lg border border-slate-300">
               {formatTime(mainTimeLeft)}
             </div>
-            
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => {
@@ -643,7 +621,6 @@ export default function KendoApp() {
                 4分
               </button>
             </div>
-
             <div className="flex justify-center gap-3 pt-2">
               <button
                 onClick={() => setMainIsRunning(!mainIsRunning)}
