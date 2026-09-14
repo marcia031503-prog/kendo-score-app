@@ -65,6 +65,30 @@ export default function KendoScoreApp() {
     }));
   };
 
+  // 勝敗・本数集計（一本履歴の数などから簡易判定、またはログの勝敗数）
+  const calculateScore = (team) => {
+    let wins = 0;
+    let hon = 0;
+    Object.values(matchLogs).forEach((logs) => {
+      logs.forEach((log) => {
+        if (log.team === team) hon++;
+      });
+    });
+    return { wins, hon };
+  };
+
+  const redScore = calculateScore('red');
+  const whiteScore = calculateScore('white');
+
+  const handleCopyExcelTable = () => {
+    const headers = ['項目', '先鋒', '次鋒', '中堅', '副将', '大将', '代表戦'];
+    const redRow = [redTeamName, ...positions.map((p) => redPlayers[p.key])];
+    const whiteRow = [whiteTeamName, ...positions.map((p) => whitePlayers[p.key])];
+    const tsvContent = [headers.join('\t'), redRow.join('\t'), whiteRow.join('\t')].join('\n');
+    navigator.clipboard.writeText(tsvContent);
+    alert('Excel貼付用の一覧表をコピーしました！');
+  };
+
   const positions = [
     { key: 'senpo', label: '先鋒' },
     { key: 'jiho', label: '次鋒' },
@@ -78,31 +102,39 @@ export default function KendoScoreApp() {
     <div className="p-4 bg-gray-100 min-h-screen text-xs">
       <div className="mb-4 bg-gray-900 text-white p-3 rounded-lg flex items-center justify-between">
         <div className="font-bold text-sm">剣道試合スコア管理アプリ</div>
-        <div className="flex gap-2 text-xs">
+        <div className="flex gap-2 items-center">
           <button
-            onClick={() => setActiveTab('team')}
-            className={`px-3 py-1.5 rounded font-bold ${activeTab === 'team' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'}`}
+            onClick={handleCopyExcelTable}
+            className="px-3 py-1.5 rounded font-bold bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
           >
-            団体戦
+            Excel用コピー
           </button>
-          <button
-            onClick={() => setActiveTab('individual')}
-            className={`px-3 py-1.5 rounded font-bold ${activeTab === 'individual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}
-          >
-            個人戦
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`px-3 py-1.5 rounded font-bold ${activeTab === 'history' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300'}`}
-          >
-            試合履歴 (0)
-          </button>
-          <button
-            onClick={() => setActiveTab('timer')}
-            className={`px-3 py-1.5 rounded font-bold ${activeTab === 'timer' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-300'}`}
-          >
-            独立タイマー
-          </button>
+          <div className="flex gap-2 text-xs">
+            <button
+              onClick={() => setActiveTab('team')}
+              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'team' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'}`}
+            >
+              団体戦
+            </button>
+            <button
+              onClick={() => setActiveTab('individual')}
+              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'individual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}
+            >
+              個人戦
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'history' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300'}`}
+            >
+              試合履歴 (0)
+            </button>
+            <button
+              onClick={() => setActiveTab('timer')}
+              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'timer' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-300'}`}
+            >
+              独立タイマー
+            </button>
+          </div>
         </div>
       </div>
 
@@ -110,7 +142,7 @@ export default function KendoScoreApp() {
         <table className="w-full border-collapse text-left min-w-[960px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
-              <th className="p-2 border-r font-bold w-24">項目</th>
+              <th className="p-2 border-r font-bold w-32">項目 / 勝敗</th>
               {positions.map((p) => (
                 <th key={p.key} className="p-2 border-r font-bold text-center">
                   {p.label}
@@ -122,14 +154,19 @@ export default function KendoScoreApp() {
             {/* 赤チーム行 */}
             <tr className="border-b bg-red-50/30">
               <td className="p-2 border-r font-bold text-red-600">
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
-                  <input
-                    type="text"
-                    value={redTeamName}
-                    onChange={(e) => setRedTeamName(e.target.value)}
-                    className="w-full border border-red-300 rounded px-1.5 py-1 bg-white font-bold text-red-700"
-                  />
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
+                    <input
+                      type="text"
+                      value={redTeamName}
+                      onChange={(e) => setRedTeamName(e.target.value)}
+                      className="w-full border border-red-300 rounded px-1.5 py-1 bg-white font-bold text-red-700"
+                    />
+                  </div>
+                  <div className="text-[11px] text-red-800 font-semibold px-1">
+                    勝数: {redScore.wins} / 本数: {redScore.hon}
+                  </div>
                 </div>
               </td>
               {positions.map((p) => (
@@ -182,14 +219,19 @@ export default function KendoScoreApp() {
             {/* 白チーム行 */}
             <tr className="bg-indigo-50/30">
               <td className="p-2 border-r font-bold text-indigo-600">
-                <div className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
-                  <input
-                    type="text"
-                    value={whiteTeamName}
-                    onChange={(e) => setWhiteTeamName(e.target.value)}
-                    className="w-full border border-indigo-300 rounded px-1.5 py-1 bg-white font-bold text-indigo-700"
-                  />
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+                    <input
+                      type="text"
+                      value={whiteTeamName}
+                      onChange={(e) => setWhiteTeamName(e.target.value)}
+                      className="w-full border border-indigo-300 rounded px-1.5 py-1 bg-white font-bold text-indigo-700"
+                    />
+                  </div>
+                  <div className="text-[11px] text-indigo-800 font-semibold px-1">
+                    勝数: {whiteScore.wins} / 本数: {whiteScore.hon}
+                  </div>
                 </div>
               </td>
               {positions.map((p) => (
