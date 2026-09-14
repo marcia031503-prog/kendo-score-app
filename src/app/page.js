@@ -154,22 +154,23 @@ export default function KendoApp() {
   const [tournamentName, setTournamentName] = useState('');
   const [matchDate, setMatchDate] = useState('');
   
-  // 指定されたメンバーのみ（田中佐藤鈴木高橋は除外）
+  // 不要プリセット（田中佐藤鈴木高橋）を除外し、必要メンバーのみ
   const playerOptions = ['重村', '山本', '山内', '橋本', '安野', '松田'];
   const [positions] = useState(['先鋒', '次鋒', '中堅', '副将', '大将', '代表戦']);
   
   const [teamRed, setTeamRed] = useState('高川');
   const [teamWhite, setTeamWhite] = useState('');
   
-  const [redPlayers, setRedPlayers] = useState(['重村', '松田', '山内', '', '', '']);
-  const [whitePlayers, setWhitePlayers] = useState(['', '', '', '', '', '']);
+  // 初期から空欄選択肢なしでメンバーを割り当て
+  const [redPlayers, setRedPlayers] = useState(['重村', '松田', '山内', '橋本', '安野', '重村']);
+  const [whitePlayers, setWhitePlayers] = useState(['山本', '山内', '橋本', '安野', '松田', '山本']);
 
   const [teamMatches, setTeamMatches] = useState(
     Array(6).fill(null).map(() => ({ history: [] }))
   );
 
   const [indPlayerRed] = useState('安野');
-  const [indPlayerWhite, setIndPlayerWhite] = useState('');
+  const [indPlayerWhite, setIndPlayerWhite] = useState('山本');
   const [indHistory, setIndHistory] = useState([]);
 
   const [mainTimeLeft, setMainTimeLeft] = useState(180); 
@@ -239,11 +240,11 @@ export default function KendoApp() {
       scoreSummary: `${summary.redIppons}本(${summary.redWins}勝) ー ${summary.whiteIppons}本(${summary.whiteWins}勝)`,
       details: positions.map((pos, idx) => {
         const m = teamMatches[idx];
-        const rP = redPlayers[idx] || (pos === '代表戦' ? '代表者未定' : '空欄(不出場)');
-        const wP = whitePlayers[idx] || (pos === '代表戦' ? '代表者未定' : '空欄(不出場)');
+        const rP = redPlayers[idx] || '未定';
+        const wP = whitePlayers[idx] || '未定';
         const hStr = m.history.map((h, i) => `${i+1}本:${h.side === 'red' ? rP : wP}(${h.waza})`).join(', ');
         const res = getMatchResult(m.history, redPlayers[idx], whitePlayers[idx]);
-        let resText = '不出場/未対戦';
+        let resText = '未対戦';
         if (res === 'red') resText = `${teamRed}勝ち`;
         else if (res === 'white') resText = `${teamWhite || '白'}勝ち`;
         else if (res === 'draw') resText = '引き分け';
@@ -270,7 +271,7 @@ export default function KendoApp() {
       tournament: tournamentName || '未入力大会',
       date: matchDate || '未入力日付',
       matchName: `${indPlayerRed} vs ${indPlayerWhite || '白選手'}`,
-      scoreSummary: `赤(${rCount}本) ー 白(${wCount}本)`,
+      scoreSummary: `赤(${rCount}본) ー 白(${wCount}본)`,
       details: `履歴: ${hStr || '技なし'} → ${resText}`
     };
 
@@ -422,7 +423,6 @@ export default function KendoApp() {
                           }}
                           className="w-full border border-red-300 rounded p-1 text-xs font-bold text-center bg-white text-red-800"
                         >
-                          <option value="">--（空欄/不出場）--</option>
                           {playerOptions.map((p) => (
                             <option key={p} value={p}>{p}</option>
                           ))}
@@ -470,17 +470,19 @@ export default function KendoApp() {
                     </td>
                     {positions.map((pos, idx) => (
                       <td key={pos} className="border-r border-slate-400 p-2">
-                        <input
-                          type="text"
+                        <select
                           value={whitePlayers[idx]}
                           onChange={(e) => {
                             const newP = [...whitePlayers];
                             newP[idx] = e.target.value;
                             setWhitePlayers(newP);
                           }}
-                          placeholder={pos === '代表戦' ? '代表者名(空欄可)' : '選手名(空欄可)'}
                           className="w-full border border-indigo-300 rounded p-1 text-xs font-bold text-center bg-white text-indigo-800"
-                        />
+                        >
+                          {playerOptions.map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
                       </td>
                     ))}
                     <td className="p-2 font-bold text-indigo-700">
@@ -512,14 +514,16 @@ export default function KendoApp() {
                 </div>
               </div>
               <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 space-y-2">
-                <label className="block text-xs font-bold text-indigo-600">白選手名（手入力）</label>
-                <input
-                  type="text"
+                <label className="block text-xs font-bold text-indigo-600">白選手名選択</label>
+                <select
                   value={indPlayerWhite}
                   onChange={(e) => setIndPlayerWhite(e.target.value)}
-                  placeholder="選手名"
                   className="w-full border border-slate-300 rounded px-2 py-1.5 text-xs bg-white font-bold text-indigo-700"
-                />
+                >
+                  {playerOptions.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <MatchTimerAndScorer
