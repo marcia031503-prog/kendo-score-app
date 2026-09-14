@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const quickWazas = ['面', 'コテ', '胴', 'ツキ'];
 const allWazas = [
@@ -9,6 +9,7 @@ const allWazas = [
   '飛び込み胴', '抜き胴', '巻き込み胴',
   'ツキ', '片手ツキ'
 ];
+
 const presetPlayers = ['重村', '松田', '山内', '橋本', '安野', '山本'];
 
 const positions = [
@@ -22,7 +23,7 @@ const positions = [
 
 export default function KendoScoreApp() {
   const [activeTab, setActiveTab] = useState('team');
-  const [redTeamName, setRedTeamName] = useState('高川');
+  const [redTeamName, setRedTeamName] = useState('赤チーム');
   const [whiteTeamName, setWhiteTeamName] = useState('白チーム');
 
   const [redPlayers, setRedPlayers] = useState({
@@ -43,90 +44,122 @@ export default function KendoScoreApp() {
     }));
   };
 
-  const getHonCount = (team) => {
-    let count = 0;
+  const calculateScore = (team) => {
+    let hon = 0;
     Object.values(matchLogs).forEach(logs => {
-      logs.forEach(l => { if (l.team === team) count++; });
+      logs.forEach(l => { if (l.team === team) hon++; });
     });
-    return count;
+    // 簡易勝数カウント（各ポジションで一本多い方を勝数としてカウントするロジックや合算も可）
+    let wins = 0;
+    positions.forEach(p => {
+      const redHon = (matchLogs[p.key] || []).filter(l => l.team === 'red').length;
+      const whiteHon = (matchLogs[p.key] || []).filter(l => l.team === 'white').length;
+      if (redHon > whiteHon && team === 'red') wins++;
+      if (whiteHon > redHon && team === 'white') wins++;
+    });
+    return { wins, hon };
   };
 
+  const redScore = calculateScore('red');
+  const whiteScore = calculateScore('white');
+
   const handleCopyExcelTable = () => {
-    const headers = ['項目/勝敗', ...positions.map(p => p.label)];
-    const redRow = [`赤:${redTeamName} (${getHonCount('red')}本)`, ...positions.map(p => redPlayers[p.key])];
-    const whiteRow = [`白:${whiteTeamName} (${getHonCount('white')}本)`, ...positions.map(p => whitePlayers[p.key])];
+    const headers = ['項目', ...positions.map(p => p.label)];
+    const redRow = [redTeamName, ...positions.map(p => redPlayers[p.key])];
+    const whiteRow = [whiteTeamName, ...positions.map(p => whitePlayers[p.key])];
+    const scoreRow = ['勝敗/本数', `${redScore.wins}勝/${redScore.hon}本`, '', '', '', '', `${whiteScore.wins}勝/${whiteScore.hon}本`];
     navigator.clipboard.writeText([headers.join('\t'), redRow.join('\t'), whiteRow.join('\t')].join('\n'));
     alert('Excel貼付用の一覧表をコピーしました！');
   };
 
   return (
-    <div className="p-3 bg-gray-100 min-h-screen text-xs">
-      <div className="mb-3 bg-gray-900 text-white p-2.5 rounded-lg flex items-center justify-between">
-        <span className="font-bold text-sm">剣道試合スコア管理アプリ</span>
-        <div className="flex gap-2">
-          <button onClick={handleCopyExcelTable} className="px-3 py-1 rounded font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
+    <div className="p-4 bg-gray-100 min-h-screen text-xs">
+      <div className="mb-4 bg-gray-900 text-white p-3 rounded-lg flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="font-bold text-sm">剣道試合スコア管理アプリ</span>
+          <button
+            onClick={handleCopyExcelTable}
+            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold"
+          >
             Excel用コピー
           </button>
-          <button onClick={() => setActiveTab('team')} className="px-3 py-1 rounded font-bold bg-red-600 text-white">
-            団体戦
-          </button>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setActiveTab('team')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'team' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300'}`}>団体戦</button>
+          <button onClick={() => setActiveTab('individual')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'individual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}>個人戦</button>
+          <button onClick={() => setActiveTab('history')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'history' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300'}`}>試合履歴 (0)</button>
+          <button onClick={() => setActiveTab('timer')} className={`px-3 py-1.5 rounded font-bold ${activeTab === 'timer' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-300'}`}>独立タイマー</button>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-300 rounded-xl overflow-x-auto">
-        <table className="w-full border-collapse text-left min-w-[1050px]">
+      <div className="overflow-x-auto bg-white border border-gray-300 rounded-xl shadow-sm">
+        <table className="w-full border-collapse text-left min-w-[1100px]">
           <thead>
-            <tr className="bg-gray-100 border-b text-gray-700">
-              <th className="p-2 border-r font-bold w-36">項目 / 勝敗</th>
+            <tr className="border-b bg-gray-100 text-gray-700">
               {positions.map(p => (
-                <th key={p.key} className="p-2 border-r text-center font-bold">{p.label}</th>
+                <th key={p.key} className="p-2 border-r font-bold text-center w-40">{p.label}</th>
               ))}
+              <th className="p-2 font-bold text-center w-28 bg-gray-200">合計</th>
             </tr>
           </thead>
           <tbody>
-            {/* 赤チーム選手行 */}
+            {/* 赤チーム選手選択行 */}
             <tr className="border-b bg-red-50/20">
-              <td className="p-2 border-r font-bold text-red-600 align-middle">
-                <input type="text" value={redTeamName} onChange={e => setRedTeamName(e.target.value)} className="w-full border border-red-300 rounded px-1.5 py-1 mb-1 font-bold text-red-700 bg-white" />
-                <div className="text-[11px]">本数: {getHonCount('red')}本</div>
-              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
                   {p.key === 'daicho' ? (
-                    <input type="text" value={redPlayers[p.key]} onChange={e => setRedPlayers({...redPlayers, [p.key]: e.target.value})} placeholder="代表者名" className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white" />
+                    <input
+                      type="text"
+                      value={redPlayers[p.key]}
+                      onChange={e => setRedPlayers({...redPlayers, [p.key]: e.target.value})}
+                      placeholder="赤代表者名"
+                      className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white"
+                    />
                   ) : (
-                    <select value={redPlayers[p.key]} onChange={e => setRedPlayers({...redPlayers, [p.key]: e.target.value})} className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white">
+                    <select
+                      value={redPlayers[p.key]}
+                      onChange={e => setRedPlayers({...redPlayers, [p.key]: e.target.value})}
+                      className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white"
+                    >
                       <option value="">(未選択)</option>
                       {presetPlayers.map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                   )}
                 </td>
               ))}
+              <td className="p-2 text-center font-bold text-red-600 bg-red-50/40">
+                {redScore.wins}勝 / {redScore.hon}本
+              </td>
             </tr>
 
-            {/* 技・タイマー行 */}
+            {/* 各ポジションのタイマー＆技記録カラム行 */}
             <tr className="border-b">
-              <td className="p-2 border-r text-center font-bold text-gray-500 bg-gray-50 align-middle">
-                タイマー &amp; 技
-              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-top">
                   <CompactMatchColumn logs={matchLogs[p.key] || []} onAddWaza={(team, w) => handleAddWaza(p.key, team, w)} />
                 </td>
               ))}
+              <td className="p-2 text-center text-gray-400 bg-gray-50/50 align-middle">
+                各試合の勝敗
+              </td>
             </tr>
 
-            {/* 白チーム選手行（すべて自由入力） */}
+            {/* 白チーム選手入力行 */}
             <tr className="bg-indigo-50/20">
-              <td className="p-2 border-r font-bold text-indigo-600 align-middle">
-                <input type="text" value={whiteTeamName} onChange={e => setWhiteTeamName(e.target.value)} className="w-full border border-indigo-300 rounded px-1.5 py-1 mb-1 font-bold text-indigo-700 bg-white" />
-                <div className="text-[11px]">本数: {getHonCount('white')}本</div>
-              </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
-                  <input type="text" value={whitePlayers[p.key]} onChange={e => setWhitePlayers({...whitePlayers, [p.key]: e.target.value})} placeholder="選手名(自由)" className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white" />
+                  <input
+                    type="text"
+                    value={whitePlayers[p.key]}
+                    onChange={e => setWhitePlayers({...whitePlayers, [p.key]: e.target.value})}
+                    placeholder={p.key === 'daicho' ? '白代表者名' : '白選手名'}
+                    className="w-full border border-gray-300 rounded px-1.5 py-1 font-bold bg-white"
+                  />
                 </td>
               ))}
+              <td className="p-2 text-center font-bold text-indigo-600 bg-indigo-50/40">
+                {whiteScore.wins}勝 / {whiteScore.hon}本
+              </td>
             </tr>
           </tbody>
         </table>
@@ -141,7 +174,7 @@ function CompactMatchColumn({ logs, onAddWaza }) {
   const [redSelected, setRedSelected] = useState(allWazas[0]);
   const [whiteSelected, setWhiteSelected] = useState(allWazas[0]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let t;
     if (isRunning && seconds > 0) {
       t = setInterval(() => setSeconds(s => s - 1), 1000);
@@ -152,34 +185,79 @@ function CompactMatchColumn({ logs, onAddWaza }) {
   const formatTime = (sec) => `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
 
   return (
-    <div className="flex flex-col gap-1.5 p-1 bg-white border border-gray-200 rounded-lg text-xs w-full">
-      <div className="flex items-center justify-between bg-gray-50 p-1 rounded border border-gray-100">
-        <span className="font-bold text-xs">{formatTime(seconds)}</span>
+    <div className="flex flex-col gap-1.5 p-1.5 bg-white border border-gray-200 rounded-xl text-xs w-full">
+      <div className="flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+        <span className="font-bold text-sm text-gray-800">{formatTime(seconds)}</span>
         <div className="flex gap-1">
-          <button onClick={() => setIsRunning(!isRunning)} className={`px-1.5 py-0.5 rounded text-[10px] font-bold text-white ${isRunning ? 'bg-amber-500' : 'bg-emerald-600'}`}>
+          <button
+            onClick={() => setIsRunning(!isRunning)}
+            className={`px-2 py-0.5 rounded text-[10px] font-bold text-white ${isRunning ? 'bg-amber-500' : 'bg-emerald-600'}`}
+          >
             {isRunning ? '一時' : 'スタ'}
           </button>
-          <button onClick={() => { setIsRunning(false); setSeconds(180); }} className="px-1 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-700">
+          <button
+            onClick={() => { setIsRunning(false); setSeconds(180); }}
+            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-700"
+          >
             リセ
           </button>
         </div>
       </div>
-      <div className="flex gap-1">
-        {quickWazas.map(w => (
-          <button key={w} onClick={() => onAddWaza('red', w)} className="flex-1 bg-red-600 text-white py-0.5 rounded text-[9px] font-bold">{w}</button>
-        ))}
+
+      {/* 赤チーム記録 */}
+      <div className="bg-red-50/70 border border-red-200 rounded-lg p-1.5 space-y-1">
+        <div className="text-[10px] font-bold text-red-700 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block"></span>赤チーム記録
+        </div>
+        <div className="grid grid-cols-4 gap-1">
+          {quickWazas.map(w => (
+            <button key={w} onClick={() => onAddWaza('red', w)} className="bg-red-600 hover:bg-red-700 text-white text-[10px] py-1 rounded font-bold">{w}</button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1 pt-1 border-t border-red-200">
+          <select value={redSelected} onChange={e => setRedSelected(e.target.value)} className="w-full border border-red-300 rounded px-1.5 py-1 text-[11px] font-bold bg-white text-red-800">
+            {allWazas.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+          <button onClick={() => onAddWaza('red', redSelected)} className="w-full bg-red-700 hover:bg-red-800 text-white text-[10px] py-1 rounded font-bold">
+            + 詳細技を記録
+          </button>
+        </div>
       </div>
-      <div className="flex gap-1">
-        {quickWazas.map(w => (
-          <button key={w} onClick={() => onAddWaza('white', w)} className="flex-1 bg-indigo-600 text-white py-0.5 rounded text-[9px] font-bold">{w}</button>
-        ))}
+
+      {/* 白チーム記録 */}
+      <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-1.5 space-y-1">
+        <div className="text-[10px] font-bold text-indigo-700 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block"></span>白チーム記録
+        </div>
+        <div className="grid grid-cols-4 gap-1">
+          {quickWazas.map(w => (
+            <button key={w} onClick={() => onAddWaza('white', w)} className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] py-1 rounded font-bold">{w}</button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1 pt-1 border-t border-indigo-200">
+          <select value={whiteSelected} onChange={e => setWhiteSelected(e.target.value)} className="w-full border border-indigo-300 rounded px-1.5 py-1 text-[11px] font-bold bg-white text-indigo-800">
+            {allWazas.map(w => <option key={w} value={w}>{w}</option>)}
+          </select>
+          <button onClick={() => onAddWaza('white', whiteSelected)} className="w-full bg-indigo-700 hover:bg-indigo-800 text-white text-[10px] py-1 rounded font-bold">
+            + 詳細技を記録
+          </button>
+        </div>
       </div>
-      <div className="max-h-12 overflow-y-auto space-y-0.5 border-t pt-1 text-[10px]">
-        {logs.map(l => (
-          <div key={l.id} className={l.team === 'red' ? 'text-red-600 font-semibold' : 'text-indigo-600 font-semibold'}>
-            [{l.team === 'red' ? '赤' : '白'}] {l.waza}
+
+      {/* 一本履歴 */}
+      <div className="pt-1 border-t border-gray-100 text-[10px] text-gray-500">
+        <div className="font-bold mb-0.5 text-gray-600">この試合の一本履歴:</div>
+        {logs.length === 0 ? (
+          <div>まだ記録はありません</div>
+        ) : (
+          <div className="space-y-0.5 max-h-16 overflow-y-auto">
+            {logs.map(l => (
+              <div key={l.id} className={l.team === 'red' ? 'text-red-600 font-semibold' : 'text-indigo-600 font-semibold'}>
+                [{l.team === 'red' ? '赤' : '白'}] {l.waza}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
