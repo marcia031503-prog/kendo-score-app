@@ -23,7 +23,7 @@ const positions = [
 
 export default function KendoScoreApp() {
   const [activeTab, setActiveTab] = useState('team');
-  const [redTeamName, setRedTeamName] = useState('赤チーム');
+  const [redTeamName, setRedTeamName] = useState('高川');
   const [whiteTeamName, setWhiteTeamName] = useState('白チーム');
 
   const [redPlayers, setRedPlayers] = useState({
@@ -89,10 +89,10 @@ export default function KendoScoreApp() {
       </div>
 
       <div className="overflow-x-auto bg-white border border-gray-300 rounded-xl shadow-sm">
-        <table className="w-full border-collapse text-left min-w-[1200px]">
+        <table className="w-full border-collapse text-left min-w-[1250px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
-              <th className="p-2 border-r font-bold w-40">チーム / 項目</th>
+              <th className="p-2 border-r font-bold w-44">チーム / 勝敗・本数</th>
               {positions.map(p => (
                 <th key={p.key} className="p-2 border-r font-bold text-center w-36">{p.label}</th>
               ))}
@@ -103,12 +103,16 @@ export default function KendoScoreApp() {
             {/* 赤チーム選手選択行 */}
             <tr className="border-b bg-red-50/20">
               <td className="p-2 border-r font-bold text-red-600 align-middle">
-                <input
-                  type="text"
-                  value={redTeamName}
-                  onChange={e => setRedTeamName(e.target.value)}
-                  className="w-full border border-red-300 rounded px-1.5 py-1 font-bold bg-white text-red-700"
-                />
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
+                  <input
+                    type="text"
+                    value={redTeamName}
+                    onChange={e => setRedTeamName(e.target.value)}
+                    className="w-full border border-red-300 rounded px-1.5 py-1 font-bold bg-white text-red-700"
+                  />
+                </div>
+                <div className="text-[11px] text-red-800 font-semibold">赤チーム選手陣</div>
               </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
@@ -132,7 +136,7 @@ export default function KendoScoreApp() {
                   )}
                 </td>
               ))}
-              <td className="p-2 text-center font-bold text-red-600 bg-red-50/45">
+              <td className="p-2 text-center font-bold text-red-600 bg-red-50/45 align-middle">
                 {redScore.wins}勝 / {redScore.hon}本
               </td>
             </tr>
@@ -140,7 +144,7 @@ export default function KendoScoreApp() {
             {/* 各ポジションのタイマー＆技記録カラム行 */}
             <tr className="border-b">
               <td className="p-2 border-r text-center font-bold text-gray-500 bg-gray-50 align-middle">
-                タイマー &amp; 技
+                タイマー &amp; 技記録
               </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-top">
@@ -155,12 +159,16 @@ export default function KendoScoreApp() {
             {/* 白チーム選手入力行 */}
             <tr className="bg-indigo-50/20">
               <td className="p-2 border-r font-bold text-indigo-600 align-middle">
-                <input
-                  type="text"
-                  value={whiteTeamName}
-                  onChange={e => setWhiteTeamName(e.target.value)}
-                  className="w-full border border-indigo-300 rounded px-1.5 py-1 font-bold bg-white text-indigo-700"
-                />
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+                  <input
+                    type="text"
+                    value={whiteTeamName}
+                    onChange={e => setWhiteTeamName(e.target.value)}
+                    className="w-full border border-indigo-300 rounded px-1.5 py-1 font-bold bg-white text-indigo-700"
+                  />
+                </div>
+                <div className="text-[11px] text-indigo-800 font-semibold">白チーム選手陣</div>
               </td>
               {positions.map(p => (
                 <td key={p.key} className="p-2 border-r align-middle">
@@ -173,7 +181,7 @@ export default function KendoScoreApp() {
                   />
                 </td>
               ))}
-              <td className="p-2 text-center font-bold text-indigo-600 bg-indigo-50/45">
+              <td className="p-2 text-center font-bold text-indigo-600 bg-indigo-50/45 align-middle">
                 {whiteScore.wins}勝 / {whiteScore.hon}本
               </td>
             </tr>
