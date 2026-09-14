@@ -66,23 +66,22 @@ export default function KendoScoreApp() {
   };
 
   const calculateScore = (team) => {
-    let wins = 0;
     let hon = 0;
     Object.values(matchLogs).forEach((logs) => {
       logs.forEach((log) => {
         if (log.team === team) hon++;
       });
     });
-    return { wins, hon };
+    return { hon };
   };
 
   const redScore = calculateScore('red');
   const whiteScore = calculateScore('white');
 
   const handleCopyExcelTable = () => {
-    const headers = ['項目', '先鋒', '次鋒', '中堅', '副将', '大将', '代表戦'];
-    const redRow = [redTeamName, ...positions.map((p) => redPlayers[p.key])];
-    const whiteRow = [whiteTeamName, ...positions.map((p) => whitePlayers[p.key])];
+    const headers = ['項目/勝敗', '先鋒', '次鋒', '中堅', '副将', '大将', '代表戦'];
+    const redRow = [`赤:${redTeamName} (本:${redScore.hon})`, ...positions.map((p) => redPlayers[p.key])];
+    const whiteRow = [`白:${whiteTeamName} (本:${whiteScore.hon})`, ...positions.map((p) => whitePlayers[p.key])];
     const tsvContent = [headers.join('\t'), redRow.join('\t'), whiteRow.join('\t')].join('\n');
     navigator.clipboard.writeText(tsvContent);
     alert('Excel貼付用の一覧表をコピーしました！');
@@ -116,18 +115,6 @@ export default function KendoScoreApp() {
               団体戦
             </button>
             <button
-              onClick={() => setActiveTab('individual')}
-              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'individual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-300'}`}
-            >
-              個人戦
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-3 py-1.5 rounded font-bold ${activeTab === 'history' ? 'bg-amber-600 text-white' : 'bg-gray-800 text-gray-300'}`}
-            >
-              試合履歴 (0)
-            </button>
-            <button
               onClick={() => setActiveTab('timer')}
               className={`px-3 py-1.5 rounded font-bold ${activeTab === 'timer' ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-300'}`}
             >
@@ -138,10 +125,10 @@ export default function KendoScoreApp() {
       </div>
 
       <div className="overflow-x-auto bg-white border border-gray-300 rounded-xl shadow-sm">
-        <table className="w-full border-collapse text-left min-w-[960px]">
+        <table className="w-full border-collapse text-left min-w-[1000px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
-              <th className="p-2 border-r font-bold w-36">項目 / 勝敗</th>
+              <th className="p-2 border-r font-bold w-44">項目 / 勝敗</th>
               {positions.map((p) => (
                 <th key={p.key} className="p-2 border-r font-bold text-center">
                   {p.label}
@@ -152,10 +139,10 @@ export default function KendoScoreApp() {
           <tbody>
             {/* 赤チーム行 */}
             <tr className="border-b bg-red-50/30">
-              <td className="p-2 border-r font-bold text-red-600">
+              <td className="p-2 border-r font-bold text-red-600 align-middle">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
+                    <span className="w-2 h-2 rounded-full bg-red-600 inline-block shrink-0"></span>
                     <input
                       type="text"
                       value={redTeamName}
@@ -164,12 +151,12 @@ export default function KendoScoreApp() {
                     />
                   </div>
                   <div className="text-[11px] text-red-800 font-semibold px-1">
-                    勝数: {redScore.wins} / 本数: {redScore.hon}
+                    取得本数: {redScore.hon}本
                   </div>
                 </div>
               </td>
               {positions.map((p) => (
-                <td key={p.key} className="p-2 border-r">
+                <td key={p.key} className="p-2 border-r align-middle">
                   {p.key === 'daicho' ? (
                     <input
                       type="text"
@@ -202,7 +189,7 @@ export default function KendoScoreApp() {
 
             {/* タイマー＆技記録カラム */}
             <tr className="border-b">
-              <td className="p-2 border-r font-bold text-gray-500 bg-gray-50 text-center">
+              <td className="p-2 border-r font-bold text-gray-500 bg-gray-50 text-center align-middle">
                 タイマー &amp; 技記録
               </td>
               {positions.map((p) => (
@@ -217,10 +204,10 @@ export default function KendoScoreApp() {
 
             {/* 白チーム行 */}
             <tr className="bg-indigo-50/30">
-              <td className="p-2 border-r font-bold text-indigo-600">
+              <td className="p-2 border-r font-bold text-indigo-600 align-middle">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block shrink-0"></span>
                     <input
                       type="text"
                       value={whiteTeamName}
@@ -229,12 +216,12 @@ export default function KendoScoreApp() {
                     />
                   </div>
                   <div className="text-[11px] text-indigo-800 font-semibold px-1">
-                    勝数: {whiteScore.wins} / 本数: {whiteScore.hon}
+                    取得本数: {whiteScore.hon}本
                   </div>
                 </div>
               </td>
               {positions.map((p) => (
-                <td key={p.key} className="p-2 border-r">
+                <td key={p.key} className="p-2 border-r align-middle">
                   <input
                     type="text"
                     value={whitePlayers[p.key]}
