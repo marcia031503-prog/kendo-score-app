@@ -65,7 +65,6 @@ export default function KendoScoreApp() {
     }));
   };
 
-  // 勝敗・本数集計（一本履歴の数などから簡易判定、またはログの勝敗数）
   const calculateScore = (team) => {
     let wins = 0;
     let hon = 0;
@@ -142,7 +141,7 @@ export default function KendoScoreApp() {
         <table className="w-full border-collapse text-left min-w-[960px]">
           <thead>
             <tr className="border-b bg-gray-100 text-gray-700">
-              <th className="p-2 border-r font-bold w-32">項目 / 勝敗</th>
+              <th className="p-2 border-r font-bold w-36">項目 / 勝敗</th>
               {positions.map((p) => (
                 <th key={p.key} className="p-2 border-r font-bold text-center">
                   {p.label}
