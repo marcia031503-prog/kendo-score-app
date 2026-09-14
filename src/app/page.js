@@ -21,7 +21,7 @@ const allWazas = [
 const presetPlayers = ['重村', '松田', '山内', '橋本', '安野', '山本'];
 
 export default function KendoScoreApp() {
-  const [activeTab, setActiveTab] = useState('team'); // 'team' | 'individual' | 'history' | 'timer'
+  const [activeTab, setActiveTab] = useState('team');
   const [redTeamName, setRedTeamName] = useState('高川');
   const [whiteTeamName, setWhiteTeamName] = useState('白チーム');
 
@@ -33,13 +33,13 @@ export default function KendoScoreApp() {
     taisho: '安野',
   });
 
-  // 白チームは完全自由記入のテキストボックス
+  // 白チームは完全自由記入（初期値：空欄）
   const [whitePlayers, setWhitePlayers] = useState({
-    senpo: '山本',
-    jiho: '山内',
-    chuken: '橋本',
-    fukusho: '安野',
-    taisho: '松田',
+    senpo: '',
+    jiho: '',
+    chuken: '',
+    fukusho: '',
+    taisho: '',
   });
 
   const [matchLogs, setMatchLogs] = useState({
@@ -73,7 +73,6 @@ export default function KendoScoreApp() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen text-xs">
-      {/* トップナビゲーション（スクショ再現） */}
       <div className="mb-4 bg-gray-900 text-white p-3 rounded-lg flex items-center justify-between">
         <div className="font-bold text-sm">剣道試合スコア管理アプリ</div>
         <div className="flex gap-2 text-xs">
@@ -117,7 +116,7 @@ export default function KendoScoreApp() {
             </tr>
           </thead>
           <tbody>
-            {/* 赤チーム行：チーム名＋選手選択 */}
+            {/* 赤チーム行 */}
             <tr className="border-b bg-red-50/30">
               <td className="p-2 border-r font-bold text-red-600">
                 <div className="flex items-center gap-1">
@@ -149,7 +148,7 @@ export default function KendoScoreApp() {
               ))}
             </tr>
 
-            {/* 各ポジションのタイマー＆技記録カラム */}
+            {/* タイマー＆技記録カラム */}
             <tr className="border-b">
               <td className="p-2 border-r font-bold text-gray-500 bg-gray-50 text-center">
                 タイマー &amp; 技記録
@@ -164,7 +163,7 @@ export default function KendoScoreApp() {
               ))}
             </tr>
 
-            {/* 白チーム行：チーム名＋自由記入テキスト入力 */}
+            {/* 白チーム行（完全自由記入・初期値空） */}
             <tr className="bg-indigo-50/30">
               <td className="p-2 border-r font-bold text-indigo-600">
                 <div className="flex items-center gap-1">
@@ -185,7 +184,7 @@ export default function KendoScoreApp() {
                     onChange={(e) =>
                       setWhitePlayers({ ...whitePlayers, [p.key]: e.target.value })
                     }
-                    placeholder="選手名入力"
+                    placeholder="選手名"
                     className="w-full border border-gray-300 rounded px-1.5 py-1 bg-white focus:outline-none focus:border-indigo-500 font-bold"
                   />
                 </td>
@@ -220,7 +219,6 @@ function CompactMatchColumn({ logs, onAddWaza }) {
 
   return (
     <div className="flex flex-col gap-2 p-1.5 bg-white border border-gray-200 rounded-xl text-xs w-full">
-      {/* タイマーバー */}
       <div className="flex items-center justify-between bg-gray-50 p-1.5 rounded-lg border border-gray-100">
         <span className="font-bold text-sm text-gray-800">{formatTime(seconds)}</span>
         <div className="flex gap-1">
@@ -244,7 +242,7 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         </div>
       </div>
 
-      {/* 赤チーム記録（文字ラベルなし） */}
+      {/* 赤チーム記録（ラベルなし） */}
       <div className="bg-red-50/70 border border-red-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
@@ -278,7 +276,7 @@ function CompactMatchColumn({ logs, onAddWaza }) {
         </div>
       </div>
 
-      {/* 白チーム記録（文字ラベルなし） */}
+      {/* 白チーム記録（ラベルなし） */}
       <div className="bg-indigo-50/70 border border-indigo-200 rounded-lg p-1.5 space-y-1">
         <div className="grid grid-cols-4 gap-1">
           {quickWazas.map((w) => (
