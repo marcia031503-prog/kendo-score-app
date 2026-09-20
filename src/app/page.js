@@ -37,7 +37,7 @@ export default function KendoScoreApp() {
     senpo: [], jiho: [], chuken: [], fukusho: [], taisho: [], daicho: []
   });
 
-  // 反則（指導）カウント用ステート
+  // 反則カウント（最大2まで）
   const [penalties, setPenalties] = useState({
     senpo: { red: 0, white: 0 },
     jiho: { red: 0, white: 0 },
@@ -63,14 +63,21 @@ export default function KendoScoreApp() {
     }));
   };
 
-  // 反則変更時：2回に達したら自動で相手に「(反)」の一本を自動付与する
+  const handleRemoveWaza = (pos, id) => {
+    setMatchLogs(prev => ({
+      ...prev,
+      [pos]: (prev[pos] || []).filter(l => l.id !== id)
+    }));
+  };
+
+  // 反則変更：最大2まで。2回に達したら相手に「〇反」を自動付与
   const handlePenaltyChange = (pos, team, delta) => {
     setPenalties(prev => {
       const currentVal = prev[pos][team];
-      const newVal = Math.max(0, currentVal + delta);
+      const newVal = Math.min(2, Math.max(0, currentVal + delta)); // 0〜2に制限
       
-      // 増えた場合、2回目（2, 4, 6...回目）に達したら相手チームに「〇反」を自動追加
-      if (delta > 0 && newVal > 0 && newVal % 2 === 0) {
+      // 増えてちょうど2になったら相手に〇反を追加
+      if (delta > 0 && newVal === 2 && currentVal < 2) {
         const opposingTeam = team === 'red' ? 'white' : 'red';
         setMatchLogs(mPrev => ({
           ...mPrev,
@@ -88,12 +95,11 @@ export default function KendoScoreApp() {
     });
   };
 
-  // 個人戦用反則変更
   const handleIndivPenaltyChange = (team, delta) => {
     setIndivPenalties(prev => {
       const currentVal = prev[team];
-      const newVal = Math.max(0, currentVal + delta);
-      if (delta > 0 && newVal > 0 && newVal % 2 === 0) {
+      const newVal = Math.min(2, Math.max(0, currentVal + delta));
+      if (delta > 0 && newVal === 2 && currentVal < 2) {
         const opposingTeam = team === 'red' ? 'white' : 'red';
         setIndivLogs(lPrev => [...lPrev, { id: Math.random().toString(36), team: opposingTeam, waza: '〇反' }]);
       }
@@ -212,6 +218,7 @@ export default function KendoScoreApp() {
                       logs={matchLogs[p.key] || []}
                       penalties={penalties[p.key]}
                       onAddWaza={(team, w) => handleAddWaza(p.key, team, w)}
+                      onRemoveWaza={(id) => handleRemoveWaza(p.key, id)}
                       onPenaltyChange={(team, delta) => handlePenaltyChange(p.key, team, delta)}
                     />
                   </td>
@@ -264,7 +271,7 @@ export default function KendoScoreApp() {
               <div className="text-center font-bold text-red-600 text-lg">
                 {indivLogs.filter(l => l.team === 'red').length} 本
               </div>
-              <div className="text-xs text-red-600 font-bold">反則(指導): {indivPenalties.red}</div>
+              <div className="text-xs text-red-600 font-bold">反則(指導): {indivPenalties.red} / 2</div>
               <div className="flex gap-1">
                 <button onClick={() => handleIndivPenaltyChange('red', 1)} className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[10px]">+ 反則</button>
                 <button onClick={() => handleIndivPenaltyChange('red', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
@@ -274,13 +281,21 @@ export default function KendoScoreApp() {
                   <button key={w} onClick={() => setIndivLogs([...indivLogs, { id: Math.random().toString(36), team: 'red', waza: w }])} className="bg-red-600 hover:bg-red-700 text-white py-1 rounded font-bold">{w}</button>
                 ))}
               </div>
+              <div className="space-y-1 pt-2 border-t text-[10px]">
+                {indivLogs.map(l => (
+                  <div key={l.id} className="flex justify-between items-center text-red-600 font-semibold">
+                    <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
+                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="text-gray-400 hover:text-red-800 px-1 font-bold">×</button>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 space-y-2">
               <input type="text" value={indivWhitePlayer} onChange={e => setIndivWhitePlayer(e.target.value)} className="w-full border rounded p-1 font-bold text-indigo-700 bg-white" />
               <div className="text-center font-bold text-indigo-600 text-lg">
                 {indivLogs.filter(l => l.team === 'white').length} 本
               </div>
-              <div className="text-xs text-indigo-600 font-bold">反則(指導): {indivPenalties.white}</div>
+              <div className="text-xs text-indigo-600 font-bold">反則(指導): {indivPenalties.white} / 2</div>
               <div className="flex gap-1">
                 <button onClick={() => handleIndivPenaltyChange('white', 1)} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-bold text-[10px]">+ 反則</button>
                 <button onClick={() => handleIndivPenaltyChange('white', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
@@ -288,6 +303,14 @@ export default function KendoScoreApp() {
               <div className="grid grid-cols-2 gap-1 pt-2">
                 {quickWazas.map(w => (
                   <button key={w} onClick={() => setIndivLogs([...indivLogs, { id: Math.random().toString(36), team: 'white', waza: w }])} className="bg-indigo-600 hover:bg-indigo-700 text-white py-1 rounded font-bold">{w}</button>
+                ))}
+              </div>
+              <div className="space-y-1 pt-2 border-t text-[10px]">
+                {indivLogs.map(l => (
+                  <div key={l.id} className="flex justify-between items-center text-indigo-600 font-semibold">
+                    <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
+                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="text-gray-400 hover:text-indigo-800 px-1 font-bold">×</button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -362,7 +385,7 @@ function StandaloneTimer() {
   );
 }
 
-function CompactMatchColumn({ logs, penalties, onAddWaza, onPenaltyChange }) {
+function CompactMatchColumn({ logs, penalties, onAddWaza, onRemoveWaza, onPenaltyChange }) {
   const [seconds, setSeconds] = useState(180);
   const [isRunning, setIsRunning] = useState(false);
   const [redSelected, setRedSelected] = useState(allWazas[0]);
@@ -401,7 +424,7 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onPenaltyChange }) {
       {/* 赤チーム操作 ＆ 反則 */}
       <div className="bg-red-50/50 border border-red-200 rounded-lg p-1.5 space-y-1">
         <div className="flex justify-between items-center text-[10px] font-bold text-red-700 px-0.5">
-          <span>反則: {penalties?.red || 0}</span>
+          <span>反則: {penalties?.red || 0} / 2</span>
           <div className="flex gap-1">
             <button onClick={() => onPenaltyChange('red', 1)} className="px-1.5 py-0.5 bg-red-200 hover:bg-red-300 rounded text-red-800 font-bold">+反則</button>
             <button onClick={() => onPenaltyChange('red', -1)} className="px-1 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">-</button>
@@ -425,7 +448,7 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onPenaltyChange }) {
       {/* 白チーム操作 ＆ 反則 */}
       <div className="bg-indigo-50/50 border border-indigo-200 rounded-lg p-1.5 space-y-1">
         <div className="flex justify-between items-center text-[10px] font-bold text-indigo-700 px-0.5">
-          <span>反則: {penalties?.white || 0}</span>
+          <span>反則: {penalties?.white || 0} / 2</span>
           <div className="flex gap-1">
             <button onClick={() => onPenaltyChange('white', 1)} className="px-1.5 py-0.5 bg-indigo-200 hover:bg-indigo-300 rounded text-indigo-800 font-bold">+反則</button>
             <button onClick={() => onPenaltyChange('white', -1)} className="px-1 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">-</button>
@@ -446,16 +469,23 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onPenaltyChange }) {
         </div>
       </div>
 
-      {/* 一本・反則履歴 */}
+      {/* 一本・反則履歴（削除ボタン付き） */}
       <div className="pt-1 border-t border-gray-100 text-[10px] text-gray-500">
         {logs.length > 0 && (
           <div className="space-y-0.5 max-h-16 overflow-y-auto">
             {logs.map(l => (
               <div
                 key={l.id}
-                className={l.team === 'red' ? 'text-red-600 font-semibold' : 'text-indigo-600 font-semibold'}
+                className={`flex justify-between items-center font-semibold ${l.team === 'red' ? 'text-red-600' : 'text-indigo-600'}`}
               >
-                [{l.team === 'red' ? '赤' : '白'}] {l.waza}
+                <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
+                <button
+                  onClick={() => onRemoveWaza(l.id)}
+                  className="text-gray-400 hover:text-red-700 px-1 font-bold"
+                  title="この記録を消す"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
