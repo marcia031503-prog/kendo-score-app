@@ -53,7 +53,7 @@ export default function KendoScoreApp() {
   const [indivLogs, setIndivLogs] = useState([]);
   const [indivPenalties, setIndivPenalties] = useState({ red: 0, white: 0 });
 
-  // 試合履歴用
+  // 試合履歴用（連続した試合結果をためていく）
   const [historyList, setHistoryList] = useState([]);
 
   const handleAddWaza = (pos, team, waza) => {
@@ -94,16 +94,17 @@ export default function KendoScoreApp() {
     });
   };
 
-  // 個人戦：反則変更（チームごとに独立して制御）
-  const handleIndivPenaltyChange = (team, delta) => {
+  // 個人戦：反則変更（赤白完全独立）
+  const handleIndivPenaltyChange = (targetTeam, delta) => {
     setIndivPenalties(prev => {
-      const currentVal = prev[team];
+      const currentVal = prev[targetTeam];
       const newVal = Math.min(2, Math.max(0, currentVal + delta));
+      
       if (delta > 0 && newVal === 2 && currentVal < 2) {
-        const opposingTeam = team === 'red' ? 'white' : 'red';
+        const opposingTeam = targetTeam === 'red' ? 'white' : 'red';
         setIndivLogs(lPrev => [...lPrev, { id: Math.random().toString(36), team: opposingTeam, waza: '〇反' }]);
       }
-      return { ...prev, [team]: newVal };
+      return { ...prev, [targetTeam]: newVal };
     });
   };
 
@@ -125,6 +126,21 @@ export default function KendoScoreApp() {
   const redScore = calculateScore('red');
   const whiteScore = calculateScore('white');
 
+  // 試合結果を履歴に保存してためていく機能
+  const handleSaveMatchHistory = () => {
+    if (activeTab === 'team') {
+      const resultText = `【団体戦】 ${redTeamName} (${redScore.wins}勝 ${redScore.hon}本) vs (${whiteScore.wins}勝 ${whiteScore.hon}本) ${whiteTeamName}`;
+      setHistoryList([resultText, ...historyList]);
+      alert('団体戦の試合結果を履歴に保存しました！');
+    } else if (activeTab === 'individual') {
+      const redHons = indivLogs.filter(l => l.team === 'red').length;
+      const whiteHons = indivLogs.filter(l => l.team === 'white').length;
+      const resultText = `【個人戦】 ${indivRedPlayer} (${redHons}本) vs (${whiteHons}本) ${indivWhitePlayer}`;
+      setHistoryList([resultText, ...historyList]);
+      alert('個人戦の試合結果を履歴に保存しました！');
+    }
+  };
+
   const handleCopyExcelTable = () => {
     const headers = ['項目/勝敗', ...positions.map(p => p.label), '合計'];
     const redRow = [`赤:${redTeamName}`, ...positions.map(p => redPlayers[p.key]), `${redScore.wins}勝/${redScore.hon}本`];
@@ -143,6 +159,12 @@ export default function KendoScoreApp() {
             className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold"
           >
             Excel用コピー
+          </button>
+          <button
+            onClick={handleSaveMatchHistory}
+            className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold"
+          >
+            + 試合結果を履歴に保存
           </button>
         </div>
         <div className="flex gap-2">
@@ -334,13 +356,23 @@ export default function KendoScoreApp() {
       )}
 
       {activeTab === 'history' && (
-        <div className="bg-white p-4 rounded-xl border border-gray-300 max-w-2xl mx-auto">
-          <div className="text-sm font-bold text-gray-800 mb-2">試合履歴</div>
+        <div className="bg-white p-4 rounded-xl border border-gray-300 max-w-2xl mx-auto space-y-3">
+          <div className="flex justify-between items-center border-b pb-2">
+            <div className="text-sm font-bold text-gray-800">試合履歴一覧 ({historyList.length}件)</div>
+            {historyList.length > 0 && (
+              <button onClick={() => setHistoryList([])} className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 font-bold text-[10px]">履歴をすべてクリア</button>
+            )}
+          </div>
           {historyList.length === 0 ? (
-            <div className="text-gray-400 py-4 text-center">保存された履歴はありません</div>
+            <div className="text-gray-400 py-8 text-center">保存された試合履歴はありません。「+ 試合結果を履歴に保存」ボタンを押すとここに結果がたまっていきます。</div>
           ) : (
             <div className="space-y-2">
-              {historyList.map((h, i) => <div key={i} className="p-2 border rounded">{h}</div>)}
+              {historyList.map((h, i) => (
+                <div key={i} className="p-2.5 bg-gray-50 border border-gray-200 rounded-lg flex justify-between items-center font-medium">
+                  <span>{h}</span>
+                  <button onClick={() => setHistoryList(historyList.filter((_, idx) => idx !== i))} className="text-gray-400 hover:text-red-600 font-bold px-1.5 py-0.5">×</button>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -462,7 +494,7 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onRemoveWaza, onPenalt
           <span>反則: {penalties?.white || 0} / 2</span>
           <div className="flex gap-1">
             <button onClick={() => onPenaltyChange('white', 1)} className="px-1.5 py-0.5 bg-indigo-200 hover:bg-indigo-300 rounded text-indigo-800 font-bold">+反則</button>
-            <button onClick={() => onPenaltyChange('white', -1)} className="px-1 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">-</button>
+            <button onClick={() => onPenaltyChange('white', -1)} className="px-1.5 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">-</button>
           </div>
         </div>
         <div className="grid grid-cols-4 gap-1">
