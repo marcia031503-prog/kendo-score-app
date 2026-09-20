@@ -37,7 +37,7 @@ export default function KendoScoreApp() {
     senpo: [], jiho: [], chuken: [], fukusho: [], taisho: [], daicho: []
   });
 
-  // 反則（指導）カウント用ステート追加
+  // 反則（指導）カウント用ステート
   const [penalties, setPenalties] = useState({
     senpo: { red: 0, white: 0 },
     jiho: { red: 0, white: 0 },
@@ -63,14 +63,42 @@ export default function KendoScoreApp() {
     }));
   };
 
+  // 反則変更時：2回に達したら自動で相手に「(反)」の一本を自動付与する
   const handlePenaltyChange = (pos, team, delta) => {
-    setPenalties(prev => ({
-      ...prev,
-      [pos]: {
-        ...prev[pos],
-        [team]: Math.max(0, prev[pos][team] + delta)
+    setPenalties(prev => {
+      const currentVal = prev[pos][team];
+      const newVal = Math.max(0, currentVal + delta);
+      
+      // 増えた場合、2回目（2, 4, 6...回目）に達したら相手チームに「〇反」を自動追加
+      if (delta > 0 && newVal > 0 && newVal % 2 === 0) {
+        const opposingTeam = team === 'red' ? 'white' : 'red';
+        setMatchLogs(mPrev => ({
+          ...mPrev,
+          [pos]: [...(mPrev[pos] || []), { id: Math.random().toString(36), team: opposingTeam, waza: '〇反' }]
+        }));
       }
-    }));
+
+      return {
+        ...prev,
+        [pos]: {
+          ...prev[pos],
+          [team]: newVal
+        }
+      };
+    });
+  };
+
+  // 個人戦用反則変更
+  const handleIndivPenaltyChange = (team, delta) => {
+    setIndivPenalties(prev => {
+      const currentVal = prev[team];
+      const newVal = Math.max(0, currentVal + delta);
+      if (delta > 0 && newVal > 0 && newVal % 2 === 0) {
+        const opposingTeam = team === 'red' ? 'white' : 'red';
+        setIndivLogs(lPrev => [...lPrev, { id: Math.random().toString(36), team: opposingTeam, waza: '〇反' }]);
+      }
+      return { ...prev, [team]: newVal };
+    });
   };
 
   const calculateScore = (team) => {
@@ -78,7 +106,6 @@ export default function KendoScoreApp() {
     Object.values(matchLogs).forEach(logs => {
       logs.forEach(l => { if (l.team === team) hon++; });
     });
-    // 反則（指導2回で相手に一本＝実質本数への加算ルール対応にするか、今回はカウンター表示のみ）
     let wins = 0;
     positions.forEach(p => {
       const redHon = (matchLogs[p.key] || []).filter(l => l.team === 'red').length;
@@ -239,8 +266,8 @@ export default function KendoScoreApp() {
               </div>
               <div className="text-xs text-red-600 font-bold">反則(指導): {indivPenalties.red}</div>
               <div className="flex gap-1">
-                <button onClick={() => setIndivPenalties(p => ({...p, red: p.red + 1}))} className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[10px]">+ 反則</button>
-                <button onClick={() => setIndivPenalties(p => ({...p, red: Math.max(0, p.red - 1)}))} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
+                <button onClick={() => handleIndivPenaltyChange('red', 1)} className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[10px]">+ 反則</button>
+                <button onClick={() => handleIndivPenaltyChange('red', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
               </div>
               <div className="grid grid-cols-2 gap-1 pt-2">
                 {quickWazas.map(w => (
@@ -255,8 +282,8 @@ export default function KendoScoreApp() {
               </div>
               <div className="text-xs text-indigo-600 font-bold">反則(指導): {indivPenalties.white}</div>
               <div className="flex gap-1">
-                <button onClick={() => setIndivPenalties(p => ({...p, white: p.white + 1}))} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-bold text-[10px]">+ 反則</button>
-                <button onClick={() => setIndivPenalties(p => ({...p, white: Math.max(0, p.white - 1)}))} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
+                <button onClick={() => handleIndivPenaltyChange('white', 1)} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-bold text-[10px]">+ 反則</button>
+                <button onClick={() => handleIndivPenaltyChange('white', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
               </div>
               <div className="grid grid-cols-2 gap-1 pt-2">
                 {quickWazas.map(w => (
@@ -419,7 +446,7 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onPenaltyChange }) {
         </div>
       </div>
 
-      {/* 一本履歴 */}
+      {/* 一本・反則履歴 */}
       <div className="pt-1 border-t border-gray-100 text-[10px] text-gray-500">
         {logs.length > 0 && (
           <div className="space-y-0.5 max-h-16 overflow-y-auto">
