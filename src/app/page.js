@@ -37,7 +37,7 @@ export default function KendoScoreApp() {
     senpo: [], jiho: [], chuken: [], fukusho: [], taisho: [], daicho: []
   });
 
-  // 反則カウント（最大2まで）
+  // 団体戦の反則カウント（最大2まで）
   const [penalties, setPenalties] = useState({
     senpo: { red: 0, white: 0 },
     jiho: { red: 0, white: 0 },
@@ -70,7 +70,7 @@ export default function KendoScoreApp() {
     }));
   };
 
-  // 反則変更：最大2まで。2回に達したら相手に「〇反」を自動付与
+  // 団体戦：反則変更（最大2まで、2で相手に「〇反」付与）
   const handlePenaltyChange = (pos, team, delta) => {
     setPenalties(prev => {
       const currentVal = prev[pos][team];
@@ -94,6 +94,7 @@ export default function KendoScoreApp() {
     });
   };
 
+  // 個人戦：反則変更（チームごとに独立して制御）
   const handleIndivPenaltyChange = (team, delta) => {
     setIndivPenalties(prev => {
       const currentVal = prev[team];
@@ -265,57 +266,68 @@ export default function KendoScoreApp() {
         <div className="bg-white p-4 rounded-xl border border-gray-300 max-w-2xl mx-auto space-y-4">
           <div className="text-sm font-bold text-gray-800 border-b pb-2">個人戦スコア入力</div>
           <div className="grid grid-cols-2 gap-4">
+            {/* 赤選手カード */}
             <div className="bg-red-50 p-3 rounded-lg border border-red-200 space-y-2">
               <input type="text" value={indivRedPlayer} onChange={e => setIndivRedPlayer(e.target.value)} className="w-full border rounded p-1 font-bold text-red-700 bg-white" />
               <div className="text-center font-bold text-red-600 text-lg">
                 {indivLogs.filter(l => l.team === 'red').length} 本
               </div>
-              <div className="text-xs text-red-600 font-bold">反則(指導): {indivPenalties.red} / 2</div>
-              <div className="flex gap-1">
-                <button onClick={() => handleIndivPenaltyChange('red', 1)} className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold text-[10px]">+ 反則</button>
-                <button onClick={() => handleIndivPenaltyChange('red', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
+              <div className="flex justify-between items-center text-xs text-red-600 font-bold px-1">
+                <span>反則(指導): {indivPenalties.red} / 2</span>
+                <div className="flex gap-1">
+                  <button onClick={() => handleIndivPenaltyChange('red', 1)} className="px-1.5 py-0.5 bg-red-200 hover:bg-red-300 rounded text-red-800 font-bold text-[10px]">+反則</button>
+                  <button onClick={() => handleIndivPenaltyChange('red', -1)} className="px-1.5 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 text-[10px]">-</button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-1 pt-2">
                 {quickWazas.map(w => (
                   <button key={w} onClick={() => setIndivLogs([...indivLogs, { id: Math.random().toString(36), team: 'red', waza: w }])} className="bg-red-600 hover:bg-red-700 text-white py-1 rounded font-bold">{w}</button>
                 ))}
               </div>
-              <div className="space-y-1 pt-2 border-t text-[10px]">
-                {indivLogs.map(l => (
-                  <div key={l.id} className="flex justify-between items-center bg-white p-1 rounded border border-red-100 text-red-600 font-semibold">
-                    <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
-                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="bg-red-100 hover:bg-red-200 text-red-700 px-1.5 py-0.5 rounded font-bold">削除</button>
-                  </div>
-                ))}
-              </div>
             </div>
+
+            {/* 白選手カード */}
             <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-200 space-y-2">
               <input type="text" value={indivWhitePlayer} onChange={e => setIndivWhitePlayer(e.target.value)} className="w-full border rounded p-1 font-bold text-indigo-700 bg-white" />
               <div className="text-center font-bold text-indigo-600 text-lg">
                 {indivLogs.filter(l => l.team === 'white').length} 本
               </div>
-              <div className="text-xs text-indigo-600 font-bold">反則(指導): {indivPenalties.white} / 2</div>
-              <div className="flex gap-1">
-                <button onClick={() => handleIndivPenaltyChange('white', 1)} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-bold text-[10px]">+ 反則</button>
-                <button onClick={() => handleIndivPenaltyChange('white', -1)} className="px-2 py-0.5 bg-gray-200 text-gray-700 rounded font-bold text-[10px]">-</button>
+              <div className="flex justify-between items-center text-xs text-indigo-600 font-bold px-1">
+                <span>反則(指導): {indivPenalties.white} / 2</span>
+                <div className="flex gap-1">
+                  <button onClick={() => handleIndivPenaltyChange('white', 1)} className="px-1.5 py-0.5 bg-indigo-200 hover:bg-indigo-300 rounded text-indigo-800 font-bold text-[10px]">+反則</button>
+                  <button onClick={() => handleIndivPenaltyChange('white', -1)} className="px-1.5 py-0.5 bg-gray-200 hover:bg-gray-300 rounded text-gray-700 text-[10px]">-</button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-1 pt-2">
                 {quickWazas.map(w => (
                   <button key={w} onClick={() => setIndivLogs([...indivLogs, { id: Math.random().toString(36), team: 'white', waza: w }])} className="bg-indigo-600 hover:bg-indigo-700 text-white py-1 rounded font-bold">{w}</button>
                 ))}
               </div>
-              <div className="space-y-1 pt-2 border-t text-[10px]">
+            </div>
+          </div>
+
+          {/* 個人戦 履歴・削除リスト */}
+          <div className="pt-2 border-t text-[10px] space-y-1">
+            <div className="font-bold text-gray-600">獲得一本・反則履歴 ({indivLogs.length}件)</div>
+            {indivLogs.length === 0 ? (
+              <div className="text-gray-400 py-2 text-center">まだ記録はありません</div>
+            ) : (
+              <div className="space-y-1 max-h-32 overflow-y-auto">
                 {indivLogs.map(l => (
-                  <div key={l.id} className="flex justify-between items-center bg-white p-1 rounded border border-indigo-100 text-indigo-600 font-semibold">
-                    <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
-                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded font-bold">削除</button>
+                  <div key={l.id} className={`flex justify-between items-center p-1.5 rounded border ${l.team === 'red' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>
+                    <span className="font-semibold">[{l.team === 'red' ? indivRedPlayer : indivWhitePlayer}] {l.waza}</span>
+                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className={`px-2 py-0.5 rounded font-bold ${l.team === 'red' ? 'bg-red-200 text-red-800 hover:bg-red-300' : 'bg-indigo-200 text-indigo-800 hover:bg-indigo-300'}`}>
+                      削除
+                    </button>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
+
           <div className="flex justify-between items-center pt-2 border-t">
-            <div className="text-gray-500">履歴: {indivLogs.length}件</div>
+            <div className="text-gray-500">個人戦スコア</div>
             <button onClick={() => { setIndivLogs([]); setIndivPenalties({ red: 0, white: 0 }); }} className="px-3 py-1 bg-gray-200 rounded font-bold text-gray-700">リセット</button>
           </div>
         </div>
@@ -468,7 +480,7 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onRemoveWaza, onPenalt
         </div>
       </div>
 
-      {/* 一本・反則履歴（削除ボタンをわかりやすく修正） */}
+      {/* 一本・反則履歴（削除ボタン付き） */}
       <div className="pt-1 border-t border-gray-100 text-[10px]">
         {logs.length > 0 && (
           <div className="space-y-1 max-h-24 overflow-y-auto">
