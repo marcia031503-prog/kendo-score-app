@@ -74,9 +74,8 @@ export default function KendoScoreApp() {
   const handlePenaltyChange = (pos, team, delta) => {
     setPenalties(prev => {
       const currentVal = prev[pos][team];
-      const newVal = Math.min(2, Math.max(0, currentVal + delta)); // 0〜2に制限
+      const newVal = Math.min(2, Math.max(0, currentVal + delta));
       
-      // 増えてちょうど2になったら相手に〇反を追加
       if (delta > 0 && newVal === 2 && currentVal < 2) {
         const opposingTeam = team === 'red' ? 'white' : 'red';
         setMatchLogs(mPrev => ({
@@ -283,9 +282,9 @@ export default function KendoScoreApp() {
               </div>
               <div className="space-y-1 pt-2 border-t text-[10px]">
                 {indivLogs.map(l => (
-                  <div key={l.id} className="flex justify-between items-center text-red-600 font-semibold">
+                  <div key={l.id} className="flex justify-between items-center bg-white p-1 rounded border border-red-100 text-red-600 font-semibold">
                     <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
-                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="text-gray-400 hover:text-red-800 px-1 font-bold">×</button>
+                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="bg-red-100 hover:bg-red-200 text-red-700 px-1.5 py-0.5 rounded font-bold">削除</button>
                   </div>
                 ))}
               </div>
@@ -307,9 +306,9 @@ export default function KendoScoreApp() {
               </div>
               <div className="space-y-1 pt-2 border-t text-[10px]">
                 {indivLogs.map(l => (
-                  <div key={l.id} className="flex justify-between items-center text-indigo-600 font-semibold">
+                  <div key={l.id} className="flex justify-between items-center bg-white p-1 rounded border border-indigo-100 text-indigo-600 font-semibold">
                     <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
-                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="text-gray-400 hover:text-indigo-800 px-1 font-bold">×</button>
+                    <button onClick={() => setIndivLogs(indivLogs.filter(item => item.id !== l.id))} className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded font-bold">削除</button>
                   </div>
                 ))}
               </div>
@@ -469,22 +468,26 @@ function CompactMatchColumn({ logs, penalties, onAddWaza, onRemoveWaza, onPenalt
         </div>
       </div>
 
-      {/* 一本・反則履歴（削除ボタン付き） */}
-      <div className="pt-1 border-t border-gray-100 text-[10px] text-gray-500">
+      {/* 一本・反則履歴（削除ボタンをわかりやすく修正） */}
+      <div className="pt-1 border-t border-gray-100 text-[10px]">
         {logs.length > 0 && (
-          <div className="space-y-0.5 max-h-16 overflow-y-auto">
+          <div className="space-y-1 max-h-24 overflow-y-auto">
             {logs.map(l => (
               <div
                 key={l.id}
-                className={`flex justify-between items-center font-semibold ${l.team === 'red' ? 'text-red-600' : 'text-indigo-600'}`}
+                className={`flex justify-between items-center p-1 rounded border ${
+                  l.team === 'red' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
+                }`}
               >
-                <span>[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
+                <span className="font-semibold">[{l.team === 'red' ? '赤' : '白'}] {l.waza}</span>
                 <button
                   onClick={() => onRemoveWaza(l.id)}
-                  className="text-gray-400 hover:text-red-700 px-1 font-bold"
-                  title="この記録を消す"
+                  className={`px-1.5 py-0.5 rounded font-bold text-[9px] ${
+                    l.team === 'red' ? 'bg-red-200 hover:bg-red-300 text-red-800' : 'bg-indigo-200 hover:bg-indigo-300 text-indigo-800'
+                  }`}
+                  title="この記録を削除"
                 >
-                  ×
+                  削除
                 </button>
               </div>
             ))}
